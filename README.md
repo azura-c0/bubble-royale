@@ -3,7 +3,7 @@
 To install dependencies:
 
 ```bash
-bun i; cd server; bun i; cd ../client; bun i;
+bun i; cd server; bun i; cd ../client; bun i; cd ..
 ```
 
 To run:

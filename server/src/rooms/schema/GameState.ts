@@ -1,14 +1,36 @@
-import { Schema, MapSchema, type } from "@colyseus/schema";
+import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
 
+export class CircleEntity extends Schema {
+  @type("number") x: number = 0;
+  @type("number") y: number = 0;
+  @type("number") radius: number = 0;
 
-export class Player extends Schema {
-  @type("string") name: string = "";
-  @type("number") x: number = 512;
-  @type("number") y: number = 384
-  @type("number") rotation: number = 0;
+  constructor(x: number = 0, y: number = 0, radius: number = 0) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+  }
+}
+
+export class Player extends CircleEntity {
+  @type("string") name = "";
+  @type("string") color = "";
+  @type("number") velocityX = 0;
+  @type("number") velocityY = 0;
+  @type("number") score = 0;
+}
+
+export class Tile extends Schema {
+  @type("number") x: number = 0;
+  @type("number") y: number = 0;
+  @type("number") width: number = 0;
+  @type("number") height: number = 0;
 }
 
 export class MyRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
-  @type("number") currentTurn = 0;
+  @type(CircleEntity) bubble = new CircleEntity();
+  @type([Tile]) tiles = new ArraySchema<Tile>();
+  @type(CircleEntity) collectible =  new ArraySchema<CircleEntity>();
 }

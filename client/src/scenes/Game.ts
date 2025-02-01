@@ -3,7 +3,7 @@ import { NetworkManager } from "../utils/NetworkManager";
 import { InputHandler } from "../utils/InputHandler";
 import { PlayerPrefab, PlayerServerReference } from "../objects/PlayerPrefab";
 import { Player } from "../schema/Player";
-import { Collision } from "matter";
+import { PLAYER_ACCELERATION } from "../../../util/Constants";
 
 export class Game extends Scene {
   private _clientPlayer: PlayerPrefab;
@@ -11,7 +11,7 @@ export class Game extends Scene {
   private _playerEntities: Map<string, PlayerPrefab> = new Map<
     string,
     PlayerPrefab
-  >();
+    >();
 
   constructor() {
     super("Game");
@@ -48,16 +48,17 @@ export class Game extends Scene {
     if (this._inputHandler == null) return;
 
     if (this._inputHandler.input["up"]) {
-      this._clientPlayer.y -= 2;
+      this._clientPlayer.velocityY -= PLAYER_ACCELERATION;
     } else if (this._inputHandler.input["down"]) {
-      this._clientPlayer.y += 2;
+      this._clientPlayer.velocityY += PLAYER_ACCELERATION;
     }
 
     if (this._inputHandler.input["left"]) {
-      this._clientPlayer.x -= 2;
+      this._clientPlayer.velocityX -= PLAYER_ACCELERATION;
     } else if (this._inputHandler.input["right"]) {
-      this._clientPlayer.x += 2;
+      this._clientPlayer.velocityX += PLAYER_ACCELERATION;
     }
+    this._clientPlayer.update();
   }
 
   private handlePlayerEntityMovement() {
@@ -70,6 +71,11 @@ export class Game extends Scene {
   }
 
   private initializePlayerEntities() {
+    // this._playerEntities.set(
+    //   'fake_ass',
+    //   new PlayerPrefab(this, 40, 40, 0, 0, 0x00ff00)
+    // );
+
     NetworkManager.getInstance().room.state.players.onAdd(
       (player: Player, sessionId: string) => {
         // Initialize client player
@@ -80,17 +86,18 @@ export class Game extends Scene {
             this,
             player.x,
             player.y,
-            "ship",
+            0, 0,
+            0xff0000,
             player,
           );
 
           new PlayerServerReference(this._clientPlayer, player);
         } else {
           //Initialize other player entities
-          this._playerEntities.set(
-            sessionId,
-            new PlayerPrefab(this, player.x, player.y, "ship", player),
-          );
+          // this._playerEntities.set(
+          //   sessionId,
+          //   new PlayerPrefab(this, player.x, player.y, 0, 0, 0x00ff00, player),
+          // );
         }
       },
     );

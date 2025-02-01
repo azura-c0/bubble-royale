@@ -1,4 +1,4 @@
-import { CollideRects } from "../../../../util/Collision";
+import { CollideRects } from "../../../../util/Collision"
 import { TILE_SIZE } from "../../../../util/Constants";
 import { MyRoom } from "../MyRoom";
 import { RectEntity } from "../objects/Entity";

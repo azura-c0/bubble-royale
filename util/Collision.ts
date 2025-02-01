@@ -26,8 +26,38 @@ export function CollideCircles(a: MovingCircle, b: MovingCircle) {
   return dist < rSum;
 }
 
-export function CollideCircleTile(circle: CircleEntity, tile: Tile) {
+export function CollideCircleTile(circle: CircleEntity, tile: Tile): [boolean, [number, number]] {
+  const closestX = Clamp(circle.x, tile.x, tile.x + tile.width)
+  const closestY = Clamp(circle.y, tile.y, tile.y + tile.height)
+  const rSquared = circle.radius * circle.radius;
 
+  const xDiff = circle.x - closestX;
+  const yDiff = circle.y - closestY;
+  const lengthSquared = (xDiff * xDiff) + (yDiff * yDiff);
+
+  if (lengthSquared > rSquared) return [false, [0, 0]];
+
+  const isBottom = closestY > (tile.y + tile.height / 2);
+  const isRight = closestX > (tile.x + tile.width / 2);
+
+  const xOffset = Math.abs(closestX - tile.x + tile.width / 2);
+  const yOffset = Math.abs(closestY - tile.y + tile.height / 2);
+
+  const topDownBias = yOffset > xOffset;
+
+  if (topDownBias) {
+    if (isBottom) {
+      return [true, [0, 1]];
+    } else {
+      return [true, [0, -1]];
+    }
+  } else {
+    if (isRight) {
+      return [true, [1, 0]];
+    } else {
+      return [true, [-1, 0]];
+    }
+  }
 }
 
 export function DotProduct(a: EzVec, b: EzVec): number {
@@ -35,16 +65,16 @@ export function DotProduct(a: EzVec, b: EzVec): number {
 }
 
 export function Vec2dLen(vec: EzVec): number {
-    return Math.sqrt((vec[0] * vec[0]) + (vec[1] * vec[1]));
+  return Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1]);
 }
 
 export function Vec2dNormal(vec: EzVec): EzVec {
-    const len = Vec2dLen(vec);
-    return [vec[0] / len, vec[1] / len];
+  const len = Vec2dLen(vec);
+  return [vec[0] / len, vec[1] / len];
 }
 
 export function Vec2dScal(vec: EzVec, scale: number): EzVec {
-    return [vec[0] * scale, vec[1] * scale]
+  return [vec[0] * scale, vec[1] * scale];
 }
 
 export function ClampLength(vec: EzVec, length: number): [number, number] {
@@ -59,46 +89,51 @@ export function ClampLength(vec: EzVec, length: number): [number, number] {
 }
 
 function Reflect(a: EzVec, n: EzVec) {
-    const dp = DotProduct(a, n);
-    return [
-         a[0] - 2 * dp * n[0],
-        a[1] - 2 * dp * n[1]
-    ];
+  const dp = DotProduct(a, n);
+  return [a[0] - 2 * dp * n[0], a[1] - 2 * dp * n[1]];
 }
 
 export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
-    const n: EzVec = [a.x - b.x, a.y - b.y];
-    const nLen = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
-    const nNormalized = [n[0] / nLen, n[1] / nLen];
+  const n: EzVec = [a.x - b.x, a.y - b.y];
+  const nLen = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
+  const nNormalized = [n[0] / nLen, n[1] / nLen];
 
-    const rSum = a.radius + b.radius;
-    const diff = rSum - nLen;
+  const rSum = a.radius + b.radius;
+  const diff = rSum - nLen;
 
-    a.x += nNormalized[0] * (diff / 2);
-    a.y += nNormalized[1] * (diff / 2);
+  a.x += nNormalized[0] * (diff / 2);
+  a.y += nNormalized[1] * (diff / 2);
 
-    b.x -= nNormalized[0] * (diff / 2);
-    b.y += nNormalized[1] * (diff / 2);
+  b.x -= nNormalized[0] * (diff / 2);
+  b.y += nNormalized[1] * (diff / 2);
 
-    n[0] /= nLen;
-    n[1] /= nLen;
+  n[0] /= nLen;
+  n[1] /= nLen;
 
-    const relVel: EzVec = [a.velocityX - b.velocityX, a.velocityY - b.velocityY];
+  const relVel: EzVec = [a.velocityX - b.velocityX, a.velocityY - b.velocityY];
 
-    const reflected = Reflect(relVel, n);
-    a.velocityX = reflected[0] * 0.8;
-    a.velocityY = reflected[1] * 0.8;
-    b.velocityX = -reflected[0] * 0.8;
-    b.velocityY = -reflected[1] * 0.8;
+  const reflected = Reflect(relVel, n);
+  a.velocityX = reflected[0] * 0.8;
+  a.velocityY = reflected[1] * 0.8;
+  b.velocityX = -reflected[0] * 0.8;
+  b.velocityY = -reflected[1] * 0.8;
+}
+
+export function ResolveCircleTileCollision(circle: MovingCircle, tile: Tile) {
+
 }
 
 export function CollideRects(a: Rect, b: Rect) {
-  const collided = a.x < b.x + b.width &&
+  const collided =
+    a.x < b.x + b.width &&
     a.x + a.width > b.x &&
     a.y < b.y + b.height &&
     a.y + a.height > b.y;
 
   console.log(collided);
   return collided;
+}
 
+function Clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }

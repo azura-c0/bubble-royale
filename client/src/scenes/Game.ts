@@ -109,6 +109,7 @@ export class Game extends Scene {
               player.y,
               player.velocityX, player.velocityY,
               0xff0000,
+              player.name,
               player,
             )
           );
@@ -118,7 +119,7 @@ export class Game extends Scene {
           //Initialize other player entities
           this._playerEntities.set(
             sessionId,
-            new PlayerPrefab(this, 100, 32, 0, 0, 0x00ff00, player),
+            new PlayerPrefab(this, player.x, player.y, player.velocityX, player.velocityY, 0x00ff00, player.name, player),
           );
         }
       },

@@ -7,6 +7,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public radius: number;
   protected viewDir: [number, number];
   protected arc: Phaser.GameObjects.Arc;
+  protected text: Phaser.GameObjects.Text;
 
   constructor(
     scene: Phaser.Scene,
@@ -15,6 +16,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     public velocityX: number,
     public velocityY: number,
     public color: number,
+    public name: string,
     state?: Player,
   ) {
     super(scene, x, y, "astronaut");
@@ -22,6 +24,22 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     this.scene.add.existing(this);
     this.setScale(1);
     this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
+    this.text = scene.add.text(x, y, this.name, {
+      color: "red",
+      fontSize: 10,
+      fontFamily: 'ProggyClean',
+      resolution: 8,
+      shadow: {
+        color: "white",
+        blur: 10,
+        offsetX: 0,
+        offsetY: 0,
+        fill: true
+      }
+    });
+    this.text.x = this.x - this.text.width / 2;
+    this.text.setDepth(1);
+    
     this.radius = PLAYER_RADIUS;
     if (state) {
       this.initializePlayer(state);
@@ -37,7 +55,11 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public override update(time: number, dt: number) {
     this.arc.x = this.x;
     this.arc.y = this.y;
-    //this.sync();
+    if (this.text) {
+      this.text.x = this.x - this.text.width / 2;
+      this.text.y = this.y - PLAYER_RADIUS - this.text.height - 5;
+    }
+    this.sync();
   }
 
   protected sync() {
@@ -60,9 +82,10 @@ export class ClientPlayer extends PlayerPrefab {
     velocityX: number,
     velocityY: number,
     color: number,
+    name: string,
     state?: Player,
   ) {
-    super(scene, x, y, velocityX, velocityY, color, state);
+    super(scene, x, y, velocityX, velocityY, color, name, state);
     this.cameraPoint = {
       x,
       y
@@ -110,7 +133,10 @@ export class ClientPlayer extends PlayerPrefab {
 }
 
 export class PlayerServerReference extends PlayerPrefab {
-  constructor(public playerPrefab: PlayerPrefab, serverState: Player) {
+  constructor(
+    public playerPrefab: PlayerPrefab,
+    serverState: Player
+  ) {
     super(
       playerPrefab.scene,
       playerPrefab.x,
@@ -118,6 +144,7 @@ export class PlayerServerReference extends PlayerPrefab {
       playerPrefab.velocityX,
       playerPrefab.velocityY,
       playerPrefab.color,
+      serverState.name,
       serverState
     );
 

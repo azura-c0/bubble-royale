@@ -14,6 +14,12 @@ export class CircleEntity extends Schema {
   }
 }
 
+const names = [
+  "El Squido",
+  "The Great Hambus",
+  "xXx_NoScope420_xXx"
+];
+
 export class Player extends CircleEntity {
   @type("string") name = "";
   @type("string") color = "";
@@ -26,6 +32,7 @@ export class Player extends CircleEntity {
     super(0, 0, PLAYER_RADIUS);
     this.velocityX = 0.01;
     this.velocityY = 0.01;
+    this.name = names[Math.floor(Math.random() * 3.0)] ?? "Unnamed";
   }
 }
 

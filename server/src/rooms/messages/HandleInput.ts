@@ -1,5 +1,8 @@
 import { Client } from "colyseus";
 import { MyRoom } from "../MyRoom";
+import { PLAYER_ACCELERATION } from "../../../../util/Constants";
+import { MovePlayer } from "../../../../util/Player";
+import { CollideCircles, ReflectCircle } from "../../../../util/Collision";
 
 export const HandleInput = (
   room: MyRoom,
@@ -9,19 +12,30 @@ export const HandleInput = (
   const player = room.state.players.get(client.sessionId);
   if (player) {
     if (message.up) {
-      console.log(client.sessionId, "moved to", player.x, player.y);
-      player.y -= 2;
+      player.velocityY -= PLAYER_ACCELERATION;
     } else if (message.down) {
-      player.y += 2;
-      console.log(client.sessionId, "moved to", player.x, player.y);
+      player.velocityY += PLAYER_ACCELERATION;
     }
 
     if (message.left) {
-      player.x -= 2;
-      console.log(client.sessionId, "moved to", player.x, player.y);
+      player.velocityX -= PLAYER_ACCELERATION;
     } else if (message.right) {
-      player.x += 2;
-      console.log(client.sessionId, "moved to", player.x, player.y);
+      player.velocityX += PLAYER_ACCELERATION;
     }
+
+    MovePlayer(player);
+
+    room.state.players.forEach((otherPlayer) => {
+      if (otherPlayer === player) return;
+      if (CollideCircles(otherPlayer, player)) {
+        [otherPlayer.velocityX, otherPlayer.velocityY] = ReflectCircle(
+          player,
+          otherPlayer,
+          otherPlayer.velocityX,
+          otherPlayer.velocityY,
+        );
+        console.log('collided')
+      }
+    });
   }
 };

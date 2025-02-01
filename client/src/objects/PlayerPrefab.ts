@@ -15,7 +15,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Arc {
     super(scene, x, y, PLAYER_RADIUS, 0, 360, false, color);
     this.scene = scene;
     this.scene.add.existing(this);
-    this.setScale(2);
+    this.setScale(1);
     if (state) {
       this.initializePlayer(state);
     }

@@ -58,7 +58,7 @@ export class Game extends Scene {
     } else if (this._inputHandler.input["right"]) {
       this._clientPlayer.velocityX += PLAYER_ACCELERATION;
     }
-    this._clientPlayer.update();
+    this._clientPlayer?.update();
   }
 
   private handlePlayerEntityMovement() {
@@ -94,10 +94,10 @@ export class Game extends Scene {
           new PlayerServerReference(this._clientPlayer, player);
         } else {
           //Initialize other player entities
-          // this._playerEntities.set(
-          //   sessionId,
-          //   new PlayerPrefab(this, player.x, player.y, 0, 0, 0x00ff00, player),
-          // );
+          this._playerEntities.set(
+            sessionId,
+            new PlayerPrefab(this, player.x, player.y, 0, 0, 0x00ff00, player),
+          );
         }
       },
     );

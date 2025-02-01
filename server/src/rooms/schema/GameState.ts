@@ -1,4 +1,5 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
+import { PLAYER_RADIUS } from "../../../../util/Constants";
 
 export class CircleEntity extends Schema {
   @type("number") x: number = 0;
@@ -19,6 +20,12 @@ export class Player extends CircleEntity {
   @type("number") velocityX = 0;
   @type("number") velocityY = 0;
   @type("number") score = 0;
+
+  constructor() {
+    super(0, 0, PLAYER_RADIUS);
+    this.velocityX = 0.01;
+    this.velocityY = 0.01;
+  }
 }
 
 export class Tile extends Schema {

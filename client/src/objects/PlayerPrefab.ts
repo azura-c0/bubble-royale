@@ -37,7 +37,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public override update(time: number, dt: number) {
     this.arc.x = this.x;
     this.arc.y = this.y;
-    //this.sync();
+    this.sync();
   }
 
   protected sync() {

@@ -6,6 +6,7 @@ import {
   CollideCircles,
   CollideCircleTile,
   ResolveCircleCollision,
+  ResolveCircleTileCollision,
 } from "../../../util/Collision";
 import { MovePlayer } from "../../../util/Player";
 
@@ -17,12 +18,12 @@ export class MyRoom extends Room<MyRoomState> {
   onCreate(options: any) {
     this.setState(new MyRoomState());
     this.setSimulationInterval((deltaTime) => {
-        this.elapsedTime += deltaTime;
+      this.elapsedTime += deltaTime;
 
-        while (this.elapsedTime >= this.fixedTimeStep) {
-            this.elapsedTime -= this.fixedTimeStep;
-            this.fixedUpdate(this.fixedTimeStep);
-        }
+      while (this.elapsedTime >= this.fixedTimeStep) {
+        this.elapsedTime -= this.fixedTimeStep;
+        this.fixedUpdate(this.fixedTimeStep);
+      }
     });
 
     InitializeGame(this);
@@ -36,14 +37,25 @@ export class MyRoom extends Room<MyRoomState> {
     this.state.players.forEach((player) => {
       let input: InputMessage;
 
-      while (input = player.inputQueue.shift()) {
+      while ((input = player.inputQueue.shift())) {
         HandleInput(input, player);
       }
+
+      // Player collisions
       this.state.players.forEach((otherPlayer) => {
         if (otherPlayer === player) return;
 
         if (CollideCircles(player, otherPlayer)) {
           ResolveCircleCollision(player, otherPlayer);
+        }
+      });
+
+      // Tile collisions
+      this.state.tiles.forEach((tile) => {
+        const [hit, n] = CollideCircleTile(player, tile);
+        if (hit) {
+          ResolveCircleTileCollision(player, tile, n);
+          return;
         }
       });
 

@@ -49,10 +49,10 @@ export class InputHandler {
         }),
       );
     }
+  }
 
-    this._scene.events.on("update", () => {
-      NetworkManager.getInstance().room.send("input", this._input);
-    });
+  public sync() {
+    NetworkManager.getInstance().room.send("input", this._input);
   }
 
   public stopListening() {

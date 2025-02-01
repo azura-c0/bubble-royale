@@ -64,6 +64,7 @@ export class Game extends Scene {
       MovePlayer(player, delta);
       player.update(0, 0);
     });
+    this._inputHandler.sync();
   }
 
   update(time: number, dt: number) {

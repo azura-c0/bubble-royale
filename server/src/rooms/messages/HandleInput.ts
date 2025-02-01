@@ -29,13 +29,6 @@ export const HandleInput = (
       if (otherPlayer === player) return;
       if (CollideCircles(otherPlayer, player)) {
         ResolveCircleCollision(otherPlayer, player);
-        // [otherPlayer.velocityX, otherPlayer.velocityY] = ReflectCircle(
-        //   player,
-        //   otherPlayer,
-        //   otherPlayer.velocityX,
-        //   otherPlayer.velocityY,
-        // );
-        console.log('collided')
       }
     });
   }

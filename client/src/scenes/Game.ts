@@ -5,14 +5,16 @@ import { ClientPlayer, PlayerPrefab, PlayerServerReference } from "../objects/Pl
 import { Player } from "../schema/Player";
 import { PLAYER_ACCELERATION } from "../../../util/Constants";
 import { CollideCircles, ResolveCircleCollision } from "../../../util/Collision";
+import { Tile } from "../schema/Tile";
 
 export class Game extends Scene {
   private _clientPlayer: ClientPlayer;
   private _inputHandler: InputHandler;
+  private _tiles: Phaser.GameObjects.Rectangle[] = [];
   private _playerEntities: Map<string, PlayerPrefab> = new Map<
     string,
     PlayerPrefab
-    >();
+  >();
 
   constructor() {
     super("Game");
@@ -38,6 +40,7 @@ export class Game extends Scene {
     //bg.setScale(3, 3);
     this._inputHandler.startListening();
     this.initializePlayerEntities();
+    this.initalizeTiles();
   }
 
   update() {
@@ -85,6 +88,17 @@ export class Game extends Scene {
             new PlayerPrefab(this, 100, 32, 0, 0, 0x00ff00, player),
           );
         }
+      },
+    );
+  }
+
+  private initalizeTiles() {
+    NetworkManager.getInstance().room.state.tiles.onAdd(
+      (tile: Tile) => { 
+        const newTile = this.add.rectangle(tile.x, tile.y, tile.width, tile.height, 0x00000)
+        this._tiles.push(newTile);
+        console.log(`new tile at ${tile.x}, ${tile.y}`)
+        console.log(this._tiles.length);
       },
     );
   }

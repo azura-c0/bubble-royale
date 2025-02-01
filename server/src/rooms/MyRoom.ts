@@ -11,40 +11,28 @@ import { MovePlayer } from "../../../util/Player";
 
 export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
+  elapsedTime: number = 0;
+  fixedTimeStep: number = 1000 / 60;
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
-    // this.clock.setInterval(() => {
-    //   this.state.players.forEach((player) => {
-    //     this.state.players.forEach((otherPlayer) => {
-    //       if (player === otherPlayer) {
-    //         return;
-    //       }
-    //       if (CollideCircles(otherPlayer, player)) {
-    //         ResolveCircleCollision(otherPlayer, player);
-    //       }
-    //     });
+    this.setSimulationInterval((deltaTime) => {
+        this.elapsedTime += deltaTime;
 
-    //     this.state.tiles.forEach((tile) => {
-    //       const [collided, normal] = CollideCircleTile(player, tile);
+        while (this.elapsedTime >= this.fixedTimeStep) {
+            this.elapsedTime -= this.fixedTimeStep;
+            this.fixedUpdate(this.fixedTimeStep);
+        }
+    });
 
-    //       if (collided) {
-    //         // console.log(`collided with tile ${normal}`);
-    //       }
-    //     });
-    //     MovePlayer(player, this.clock.deltaTime);
-    //   });
-
-    // }, 100);
     InitializeGame(this);
-    this.setSimulationInterval((delta) => this.update(delta));
     this.onMessage("input", (client, message: InputMessage) => {
       const player = this.state.players.get(client.sessionId);
       player.inputQueue.push(message);
     });
   }
 
-  update(delta: number) {
+  fixedUpdate(delta: number) {
     this.state.players.forEach((player) => {
       let input: InputMessage;
 

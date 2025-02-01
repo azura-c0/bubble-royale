@@ -4,6 +4,7 @@ import { InputHandler } from "../utils/InputHandler";
 import { PlayerPrefab, PlayerServerReference } from "../objects/PlayerPrefab";
 import { Player } from "../schema/Player";
 import { PLAYER_ACCELERATION } from "../../../util/Constants";
+import { CollideCircles, ResolveCircleCollision } from "../../../util/Collision";
 
 export class Game extends Scene {
   private _clientPlayer: PlayerPrefab;
@@ -42,6 +43,7 @@ export class Game extends Scene {
   update() {
     this.handlePlayerEntityMovement();
     this.handleClientPlayerMovement();
+    this.handlePlayerCollisions();
   }
 
   private handleClientPlayerMovement() {
@@ -63,40 +65,46 @@ export class Game extends Scene {
 
   private handlePlayerEntityMovement() {
     for (const [sessionId, entity] of this._playerEntities) {
-      if (sessionId === NetworkManager.getInstance().room.sessionId) continue;
+      //if (sessionId === NetworkManager.getInstance().room.sessionId) continue;
       const serverState: Player = entity.getData("state");
       entity.x = Phaser.Math.Linear(entity.x, serverState.x, 0.2);
       entity.y = Phaser.Math.Linear(entity.y, serverState.y, 0.2);
     }
   }
 
-  private initializePlayerEntities() {
-    // this._playerEntities.set(
-    //   'fake_ass',
-    //   new PlayerPrefab(this, 40, 40, 0, 0, 0x00ff00)
-    // );
+  private handlePlayerCollisions() {
+    for (const player of this._playerEntities.values().filter(p => p !== this._clientPlayer)) {
+      if (CollideCircles(this._clientPlayer, player)) {
+        ResolveCircleCollision(this._clientPlayer, player)
+      }
+    }
+  }
 
+  private initializePlayerEntities() {
     NetworkManager.getInstance().room.state.players.onAdd(
       (player: Player, sessionId: string) => {
         // Initialize client player
         if (sessionId === NetworkManager.getInstance().room.sessionId) {
           console.log("Player added", player);
 
-          this._clientPlayer = new PlayerPrefab(
-            this,
-            player.x,
-            player.y,
-            0, 0,
-            0xff0000,
-            player,
+          this._playerEntities.set(
+            sessionId,
+            this._clientPlayer = new PlayerPrefab(
+              this,
+              player.x,
+              player.y,
+              0, 0,
+              0xff0000,
+              player,
+            )
           );
 
-          new PlayerServerReference(this._clientPlayer, player);
+          //new PlayerServerReference(this._clientPlayer, player);
         } else {
           //Initialize other player entities
           this._playerEntities.set(
             sessionId,
-            new PlayerPrefab(this, player.x, player.y, 0, 0, 0x00ff00, player),
+            new PlayerPrefab(this, 100, 32, 0, 0, 0x00ff00, player),
           );
         }
       },

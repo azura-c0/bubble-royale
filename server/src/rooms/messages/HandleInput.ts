@@ -2,7 +2,7 @@ import { Client } from "colyseus";
 import { MyRoom } from "../MyRoom";
 import { PLAYER_ACCELERATION } from "../../../../util/Constants";
 import { MovePlayer } from "../../../../util/Player";
-import { CollideCircles, ReflectCircle } from "../../../../util/Collision";
+import { CollideCircles, ResolveCircleCollision } from "../../../../util/Collision";
 
 export const HandleInput = (
   room: MyRoom,
@@ -28,12 +28,13 @@ export const HandleInput = (
     room.state.players.forEach((otherPlayer) => {
       if (otherPlayer === player) return;
       if (CollideCircles(otherPlayer, player)) {
-        [otherPlayer.velocityX, otherPlayer.velocityY] = ReflectCircle(
-          player,
-          otherPlayer,
-          otherPlayer.velocityX,
-          otherPlayer.velocityY,
-        );
+        ResolveCircleCollision(otherPlayer, player);
+        // [otherPlayer.velocityX, otherPlayer.velocityY] = ReflectCircle(
+        //   player,
+        //   otherPlayer,
+        //   otherPlayer.velocityX,
+        //   otherPlayer.velocityY,
+        // );
         console.log('collided')
       }
     });

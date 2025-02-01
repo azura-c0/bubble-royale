@@ -1,6 +1,15 @@
 import type { CircleEntity } from "../client/src/schema/CircleEntity";
 
-export function CollideCircles(a: CircleEntity, b: CircleEntity) {
+type EzVec = [number, number];
+type MovingCircle = {
+    x: number,
+    y: number,
+    radius: number,
+    velocityX: number,
+    velocityY: number
+};
+
+export function CollideCircles(a: MovingCircle, b: MovingCircle) {
     const xDiff = a.x - b.x;
     const yDiff = a.y - b.y;
 
@@ -9,21 +18,11 @@ export function CollideCircles(a: CircleEntity, b: CircleEntity) {
     return dist < rSum;
 }
 
-export function ReflectCircle(a: CircleEntity, b: CircleEntity, velocityX: number, velocityY: number): [number, number] {
-    const ba = [b.x - a.x, b.y - a.y];
-    const dp = DotProduct(velocityX, velocityY, ba[0], ba[1]);
-
-    return [
-        velocityX - 2 * dp * ba[0],
-        velocityY - 2 * dp * ba[1]
-    ];
+export function DotProduct(a: EzVec, b: EzVec): number {
+    return a[0] * b[0] + a[1] * b[1];
 }
 
-export function DotProduct(x1: number, y1: number, x2: number, y2: number): number {
-    return x1 * x2 + y1 * y2;
-}
-
-export function ClampLength(vec: [number, number], length: number): [number, number] {
+export function ClampLength(vec: EzVec, length: number): [number, number] {
     const vecSquared = (vec[0] * vec[0]) + (vec[1] * vec[1]);
     const lengthSquared = length * length;
     if (vecSquared <= lengthSquared) {
@@ -32,4 +31,28 @@ export function ClampLength(vec: [number, number], length: number): [number, num
     const vecLength = Math.sqrt(vecSquared);
 
     return [vec[0] / vecLength * length, vec[1] / vecLength * length];
+}
+
+function Reflect(a: EzVec, n: EzVec) {
+    const dp = DotProduct(a, n);
+    return [
+         a[0] - 2 * dp * n[0],
+        a[1] - 2 * dp * n[1]
+    ];
+}
+
+export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
+    const n: EzVec = [a.x - b.x, a.y - b.y];
+    const nLen = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
+
+    n[0] /= nLen;
+    n[1] /= nLen;
+
+    const relVel: EzVec = [a.velocityX - b.velocityX, a.velocityY - b.velocityY];
+
+    const reflected = Reflect(relVel, n);
+    a.velocityX = reflected[0];
+    a.velocityY = reflected[1];
+    b.velocityX = -reflected[0];
+    b.velocityY = -reflected[1];
 }

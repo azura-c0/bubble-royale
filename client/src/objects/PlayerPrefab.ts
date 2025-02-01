@@ -33,7 +33,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Arc {
 }
 
 export class PlayerServerReference extends PlayerPrefab {
-  constructor(playerPrefab: PlayerPrefab, serverState: Player) {
+  constructor(public playerPrefab: PlayerPrefab, serverState: Player) {
     super(
       playerPrefab.scene,
       playerPrefab.x,
@@ -46,6 +46,7 @@ export class PlayerServerReference extends PlayerPrefab {
 
     this.setAlpha(0.25);
     serverState.onChange(() => {
+      this.playerPrefab.setData("state", serverState);
       this.setPosition(serverState.x, serverState.y);
     });
   }

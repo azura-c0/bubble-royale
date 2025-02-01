@@ -3,26 +3,23 @@ import { MyRoom } from "../MyRoom";
 import { PLAYER_ACCELERATION } from "../../../../util/Constants";
 import { MovePlayer } from "../../../../util/Player";
 import { CollideCircles, ResolveCircleCollision, CollideCircleTile } from "../../../../util/Collision";
+import { Player } from "../schema/GameState";
 
 export const HandleInput = (
-  room: MyRoom,
-  client: Client,
-  message: InputMessage,
+  input: InputMessage,
+  player: Player
 ) => {
-  const player = room.state.players.get(client.sessionId);
   if (player) {
-    if (message.up) {
+    if (input.up) {
       player.velocityY -= PLAYER_ACCELERATION;
-    } else if (message.down) {
+    } else if (input.down) {
       player.velocityY += PLAYER_ACCELERATION;
     }
 
-    if (message.left) {
+    if (input.left) {
       player.velocityX -= PLAYER_ACCELERATION;
-    } else if (message.right) {
+    } else if (input.right) {
       player.velocityX += PLAYER_ACCELERATION;
     }
-
-
   }
 };

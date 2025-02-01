@@ -20,6 +20,7 @@ export class Player extends CircleEntity {
   @type("number") velocityX = 0;
   @type("number") velocityY = 0;
   @type("number") score = 0;
+  inputQueue: InputMessage[] = [];
 
   constructor() {
     super(0, 0, PLAYER_RADIUS);

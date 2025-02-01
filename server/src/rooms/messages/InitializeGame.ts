@@ -7,17 +7,16 @@ import { Vector2 } from "../objects/Vector2";
 import { Tile } from "../schema/GameState";
 
 const tileShapes: string[][] = [
-  ["aa   a",
-   "aa   a",
-   "a    a",
-   "a    a",
-   "ax   a",
-   "a    a",
-   "aa   a"],
-
-  ["a   a",
+  ["aa  a",
    "a   a",
-   "ax  a"],
+   "a   a",
+   "ax  a",
+   "a   a",
+   "aa  a"],
+
+  ["a  a",
+   "a  a",
+   "ax a"],
 ]
 
 export const InitializeGame = (room: MyRoom) => {

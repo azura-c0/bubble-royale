@@ -6,8 +6,12 @@ import { Player } from "../schema/Player";
 import { PLAYER_ACCELERATION } from "../../../util/Constants";
 import { CollideCircles, ResolveCircleCollision } from "../../../util/Collision";
 import { Tile } from "../schema/Tile";
+import { MovePlayer } from "../../../util/Player";
 
+const FIXED_TIMESTEP = 1000 / 60;
 export class Game extends Scene {
+  private _accumulator = 0;
+
   private _clientPlayer: ClientPlayer;
   private _inputHandler: InputHandler;
   private _tiles: Phaser.GameObjects.Sprite[] = [];
@@ -27,7 +31,7 @@ export class Game extends Scene {
   }
 
   async create() {
-    this.cameras.main
+    this.cameras.main.roundPixels = false;
     NetworkManager.getInstance().initialize();
     await NetworkManager.getInstance().connectToRoom();
 
@@ -45,13 +49,32 @@ export class Game extends Scene {
     this.initalizeTiles();
   }
 
-  update(time: number, dt: number) {
-    for (const player of this._playerEntities.values()) {
-      player.update(time, dt);
-    }
-    this._clientPlayer?.handleInput(this._inputHandler);
+  fixedTick(delta: number) {
+    this._clientPlayer.handleInput(this._inputHandler);
     this._clientPlayer?.updateCamera(this.cameras.main);
-    this.handlePlayerCollisions();
+    this._playerEntities.forEach((player) => {
+      this._playerEntities.forEach((otherPlayer) => {
+        if (otherPlayer === player) return;
+
+        if (CollideCircles(player, otherPlayer)) {
+          ResolveCircleCollision(player, otherPlayer);
+        }
+      });
+
+      MovePlayer(player, delta);
+      player.update(0, 0);
+    });
+  }
+
+  update(time: number, dt: number) {
+    if (!this._clientPlayer) {
+      return;
+    }
+    this._accumulator += dt;
+    while (this._accumulator >= FIXED_TIMESTEP) {
+      this._accumulator -= FIXED_TIMESTEP;
+      this.fixedTick(FIXED_TIMESTEP);
+    }
   }
 
 
@@ -76,13 +99,13 @@ export class Game extends Scene {
               this,
               player.x,
               player.y,
-              0, 0,
+              player.velocityX, player.velocityY,
               0xff0000,
               player,
             )
           );
 
-          //new PlayerServerReference(this._clientPlayer, player);
+          new PlayerServerReference(this._clientPlayer, player);
         } else {
           //Initialize other player entities
           this._playerEntities.set(

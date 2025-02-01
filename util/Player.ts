@@ -9,7 +9,6 @@ export function MovePlayer(player: { x: number, y: number, velocityX: number, ve
     
     const clampVec = ClampLength([player.velocityX, player.velocityY], PLAYER_MAX_VELOCITY);
     const speed = Vec2dLen(clampVec);
-    console.log("speed", speed);
     player.x += clampVec[0] * dt;
     player.y += clampVec[1] * dt;
     const friction = Math.exp(-FRICTION_RATE * dt);

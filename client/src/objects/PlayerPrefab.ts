@@ -36,10 +36,10 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   }
 
   public override update(time: number, dt: number) {
-    MovePlayer(this, dt);
+  //  MovePlayer(this, dt);
     this.arc.x = this.x;
     this.arc.y = this.y;
-    this.sync();
+    //this.sync();
   }
 
   private sync() {
@@ -72,25 +72,25 @@ export class ClientPlayer extends PlayerPrefab {
   }
 
   public handleInput(input: InputHandler) {
-    // if (input.input["up"]) {
-    //   this.velocityY -= PLAYER_ACCELERATION;
-    //   this.viewDirTarget[1] = -1;
-    // } else if (input.input["down"]) {
-    //   this.velocityY += PLAYER_ACCELERATION;
-    //   this.viewDirTarget[1] = 1;
-    // }
+    if (input.input["up"]) {
+      this.velocityY -= PLAYER_ACCELERATION;
+      this.viewDirTarget[1] = -1;
+    } else if (input.input["down"]) {
+      this.velocityY += PLAYER_ACCELERATION;
+      this.viewDirTarget[1] = 1;
+    }
 
-    // if (input.input["left"]) {
-    //   this.velocityX -= PLAYER_ACCELERATION;
-    //   this.viewDirTarget[0] = -1;
-    // } else if (input.input["right"]) {
-    //   this.velocityX += PLAYER_ACCELERATION;
-    //   this.viewDirTarget[0] = 1;
-    // }
+    if (input.input["left"]) {
+      this.velocityX -= PLAYER_ACCELERATION;
+      this.viewDirTarget[0] = -1;
+    } else if (input.input["right"]) {
+      this.velocityX += PLAYER_ACCELERATION;
+      this.viewDirTarget[0] = 1;
+    }
 
-    // this.viewDirTarget = Vec2dNormal(this.viewDirTarget);
-    // const viewDirTargetAngle = Math.atan2(this.viewDirTarget[0], -this.viewDirTarget[1]);
-    // this.rotation = Phaser.Math.Linear(this.rotation, viewDirTargetAngle, 0.2);
+    this.viewDirTarget = Vec2dNormal(this.viewDirTarget);
+    const viewDirTargetAngle = Math.atan2(this.viewDirTarget[0], -this.viewDirTarget[1]);
+    this.rotation = Phaser.Math.Linear(this.rotation, viewDirTargetAngle, 0.2);
   }
 
   public updateCamera(camera: Phaser.Cameras.Scene2D.Camera) {

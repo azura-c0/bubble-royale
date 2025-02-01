@@ -23,7 +23,7 @@ export const HandleInput = (
       player.velocityX += PLAYER_ACCELERATION;
     }
 
-    MovePlayer(player);
+    MovePlayer(player, room.clock.deltaTime);
 
     room.state.players.forEach((otherPlayer) => {
       if (otherPlayer === player) return;

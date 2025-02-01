@@ -26,6 +26,10 @@ export function CollideCircles(a: MovingCircle, b: MovingCircle) {
   return dist < rSum;
 }
 
+export function CollideCircleTile(circle: CircleEntity, tile: Tile) {
+
+}
+
 export function DotProduct(a: EzVec, b: EzVec): number {
   return a[0] * b[0] + a[1] * b[1];
 }

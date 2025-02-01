@@ -8,7 +8,7 @@ export class MyRoom extends Room<MyRoomState> {
 
   onCreate (options: any) {
     this.setState(new MyRoomState());
-
+    this.clock.start();
     InitializeGame(this);
     this.onMessage("input", (client, message: InputMessage) => HandleInput(this, client, message));
   }

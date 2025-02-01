@@ -1,13 +1,15 @@
 import { Room, Client } from "@colyseus/core";
 import { Player, MyRoomState } from "./schema/GameState";
 import { HandleInput } from "./messages/HandleInput";
+import { InitializeGame } from "./messages/InitializeGame";
 
 export class MyRoom extends Room<MyRoomState> {
-  maxClients: number = 4;
+  maxClients: number = 20;
 
   onCreate (options: any) {
     this.setState(new MyRoomState());
 
+    InitializeGame(this);
     this.onMessage("input", (client, message: InputMessage) => HandleInput(this, client, message));
   }
   onJoin (client: Client, options: any) {

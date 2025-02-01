@@ -12,7 +12,7 @@ import { MovePlayer } from "../../../util/Player";
 export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
   elapsedTime: number = 0;
-  fixedTimeStep: number = 1000 / 60;
+  readonly fixedTimeStep: number = 1000 / 60;
 
   onCreate(options: any) {
     this.setState(new MyRoomState());

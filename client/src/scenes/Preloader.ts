@@ -9,7 +9,7 @@ export class Preloader extends Scene {
   preload() 
   {
     this.load.setPath("assets");
-    this.load.image("background", "bg.png");
+    this.load.image("background", "rocks.png");
     this.load.image("logo", "logo.png");
     this.load.image("ship", "ship.png");
   }

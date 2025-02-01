@@ -1,13 +1,13 @@
 import { Scene } from "phaser";
 import { NetworkManager } from "../utils/NetworkManager";
 import { InputHandler } from "../utils/InputHandler";
-import { PlayerPrefab, PlayerServerReference } from "../objects/PlayerPrefab";
+import { ClientPlayer, PlayerPrefab, PlayerServerReference } from "../objects/PlayerPrefab";
 import { Player } from "../schema/Player";
 import { PLAYER_ACCELERATION } from "../../../util/Constants";
 import { CollideCircles, ResolveCircleCollision } from "../../../util/Collision";
 
 export class Game extends Scene {
-  private _clientPlayer: PlayerPrefab;
+  private _clientPlayer: ClientPlayer;
   private _inputHandler: InputHandler;
   private _playerEntities: Map<string, PlayerPrefab> = new Map<
     string,
@@ -20,11 +20,10 @@ export class Game extends Scene {
 
   preload() {
     this.load.setPath("assets");
-    this.load.image("background", "bg.png");
-    this.load.image("logo", "logo.png");
   }
 
   async create() {
+    this.cameras.main
     NetworkManager.getInstance().initialize();
     await NetworkManager.getInstance().connectToRoom();
 
@@ -35,42 +34,21 @@ export class Game extends Scene {
       right: ["D", Phaser.Input.Keyboard.KeyCodes.RIGHT],
       action: [Phaser.Input.Keyboard.KeyCodes.SPACE],
     });
-
+    const bg = this.add.image(0, 0, "background");
+    //bg.setScale(3, 3);
     this._inputHandler.startListening();
     this.initializePlayerEntities();
   }
 
   update() {
-    this.handlePlayerEntityMovement();
-    this.handleClientPlayerMovement();
+    for (const player of this._playerEntities.values()) {
+      player.update();
+    }
+    this._clientPlayer?.handleInput(this._inputHandler);
+    this._clientPlayer?.updateCamera(this.cameras.main);
     this.handlePlayerCollisions();
   }
 
-  private handleClientPlayerMovement() {
-    if (this._inputHandler == null) return;
-
-    if (this._inputHandler.input["up"]) {
-      this._clientPlayer.velocityY -= PLAYER_ACCELERATION;
-    } else if (this._inputHandler.input["down"]) {
-      this._clientPlayer.velocityY += PLAYER_ACCELERATION;
-    }
-
-    if (this._inputHandler.input["left"]) {
-      this._clientPlayer.velocityX -= PLAYER_ACCELERATION;
-    } else if (this._inputHandler.input["right"]) {
-      this._clientPlayer.velocityX += PLAYER_ACCELERATION;
-    }
-    this._clientPlayer?.update();
-  }
-
-  private handlePlayerEntityMovement() {
-    for (const [sessionId, entity] of this._playerEntities) {
-      //if (sessionId === NetworkManager.getInstance().room.sessionId) continue;
-      const serverState: Player = entity.getData("state");
-      entity.x = Phaser.Math.Linear(entity.x, serverState.x, 0.2);
-      entity.y = Phaser.Math.Linear(entity.y, serverState.y, 0.2);
-    }
-  }
 
   private handlePlayerCollisions() {
     for (const player of this._playerEntities.values().filter(p => p !== this._clientPlayer)) {
@@ -89,7 +67,7 @@ export class Game extends Scene {
 
           this._playerEntities.set(
             sessionId,
-            this._clientPlayer = new PlayerPrefab(
+            this._clientPlayer = new ClientPlayer(
               this,
               player.x,
               player.y,

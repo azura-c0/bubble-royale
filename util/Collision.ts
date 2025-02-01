@@ -22,6 +22,19 @@ export function DotProduct(a: EzVec, b: EzVec): number {
     return a[0] * b[0] + a[1] * b[1];
 }
 
+export function Vec2dLen(vec: EzVec): number {
+    return Math.sqrt((vec[0] * vec[0]) + (vec[1] * vec[1]));
+}
+
+export function Vec2dNormal(vec: EzVec): EzVec {
+    const len = Vec2dLen(vec);
+    return [vec[0] / len, vec[1] / len];
+}
+
+export function Vec2dScal(vec: EzVec, scale: number): EzVec {
+    return [vec[0] * scale, vec[1] * scale]
+}
+
 export function ClampLength(vec: EzVec, length: number): [number, number] {
     const vecSquared = (vec[0] * vec[0]) + (vec[1] * vec[1]);
     const lengthSquared = length * length;

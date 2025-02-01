@@ -23,7 +23,6 @@ export const HandleInput = (
       player.velocityX += PLAYER_ACCELERATION;
     }
 
-    MovePlayer(player, room.clock.deltaTime);
 
     room.state.players.forEach((otherPlayer) => {
       if (otherPlayer === player) return;
@@ -36,8 +35,10 @@ export const HandleInput = (
       const [collided, normal] = CollideCircleTile(player, tile);
 
       if (collided) {
-        console.log(`collided with tile ${normal}`);
+        // console.log(`collided with tile ${normal}`);
       }
     });
+
+    MovePlayer(player, room.clock.deltaTime);
   }
 };

@@ -1,6 +1,5 @@
 import { Player } from "../schema/Player";
 import { PLAYER_ACCELERATION, PLAYER_RADIUS } from '../../../util/Constants';
-import { MovePlayer } from '../../../util/Player';
 import { InputHandler } from "../utils/InputHandler";
 import { Vec2dLen, Vec2dNormal } from "../../../util/Collision";
 
@@ -22,7 +21,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     this.scene = scene;
     this.scene.add.existing(this);
     this.setScale(1);
-    this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
+    //this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
     this.radius = PLAYER_RADIUS;
     if (state) {
       this.initializePlayer(state);
@@ -36,15 +35,17 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   }
 
   public override update(time: number, dt: number) {
-    this.arc.x = this.x;
-    this.arc.y = this.y;
+    // this.arc.x = this.x;
+    // this.arc.y = this.y;
     this.sync();
   }
 
-  private sync() {
+  protected sync() {
     const serverState: Player = this.getData("state");
     this.x = Phaser.Math.Linear(this.x, serverState.x, 0.2);
     this.y = Phaser.Math.Linear(this.y, serverState.y, 0.2);
+    this.velocityX = Phaser.Math.Linear(this.velocityX, serverState.velocityX, 0.2);
+    this.velocityY = Phaser.Math.Linear(this.velocityY, serverState.velocityY, 0.2);
   }
 }
 
@@ -90,6 +91,10 @@ export class ClientPlayer extends PlayerPrefab {
     this.viewDirTarget = Vec2dNormal(this.viewDirTarget);
     const viewDirTargetAngle = Math.atan2(this.viewDirTarget[0], -this.viewDirTarget[1]);
     this.rotation = Phaser.Math.Linear(this.rotation, viewDirTargetAngle, 0.2);
+  }
+
+  protected override sync() {
+    super.sync();
   }
 
   public updateCamera(camera: Phaser.Cameras.Scene2D.Camera) {

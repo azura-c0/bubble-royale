@@ -106,7 +106,7 @@ export class Game extends Scene {
             )
           );
 
-          new PlayerServerReference(this._clientPlayer, player);
+          //new PlayerServerReference(this._clientPlayer, player);
         } else {
           //Initialize other player entities
           this._playerEntities.set(

@@ -26,11 +26,20 @@ export class Tile extends Schema {
   @type("number") y: number = 0;
   @type("number") width: number = 0;
   @type("number") height: number = 0;
+
+  constructor(
+    x: number = 0,
+    y: number = 0,
+  ) {
+    super();
+    this.x = x;
+    this.y = y;
+  }
 }
 
 export class MyRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
   @type(CircleEntity) bubble = new CircleEntity();
   @type([Tile]) tiles = new ArraySchema<Tile>();
-  @type(CircleEntity) collectible =  new ArraySchema<CircleEntity>();
+  @type([CircleEntity]) collectible = new ArraySchema<CircleEntity>();
 }

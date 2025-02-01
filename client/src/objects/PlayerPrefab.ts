@@ -4,7 +4,10 @@ import { MovePlayer } from '../../../util/Player';
 import { InputHandler } from "../utils/InputHandler";
 import { Vec2dLen, Vec2dNormal } from "../../../util/Collision";
 
-export class PlayerPrefab extends Phaser.GameObjects.Arc {
+export class PlayerPrefab extends Phaser.GameObjects.Sprite {
+  public radius: number;
+  protected viewDir: [number, number];
+
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -14,10 +17,11 @@ export class PlayerPrefab extends Phaser.GameObjects.Arc {
     public color: number,
     state?: Player,
   ) {
-    super(scene, x, y, PLAYER_RADIUS, 0, 360, false, color);
+    super(scene, x, y, "astronaut");
     this.scene = scene;
     this.scene.add.existing(this);
     this.setScale(1);
+    this.radius = PLAYER_RADIUS;
     if (state) {
       this.initializePlayer(state);
     }
@@ -43,6 +47,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Arc {
 
 export class ClientPlayer extends PlayerPrefab {
   private cameraPoint: { x: number, y: number }
+  protected viewDirTarget: [number, number]
 
   constructor(
     scene: Phaser.Scene,
@@ -58,31 +63,41 @@ export class ClientPlayer extends PlayerPrefab {
       x,
       y
     };
+    this.viewDir = [0, -1];
+    this.viewDirTarget = [0, -1];
   }
 
   public handleInput(input: InputHandler) {
     if (input.input["up"]) {
       this.velocityY -= PLAYER_ACCELERATION;
+      this.viewDirTarget[1] = -1;
     } else if (input.input["down"]) {
       this.velocityY += PLAYER_ACCELERATION;
+      this.viewDirTarget[1] = 1;
     }
 
     if (input.input["left"]) {
       this.velocityX -= PLAYER_ACCELERATION;
+      this.viewDirTarget[0] = -1;
     } else if (input.input["right"]) {
       this.velocityX += PLAYER_ACCELERATION;
+      this.viewDirTarget[0] = 1;
     }
 
+    this.viewDirTarget = Vec2dNormal(this.viewDirTarget);
+    const viewDirTargetAngle = Math.atan2(this.viewDirTarget[0], -this.viewDirTarget[1]);
+    this.rotation = Phaser.Math.Linear(this.rotation, viewDirTargetAngle, 0.2);
   }
 
   public updateCamera(camera: Phaser.Cameras.Scene2D.Camera) {
+    camera.zoom = 3;
     const speed = Vec2dLen([this.velocityX, this.velocityY]);
     const dir = speed === 0 ? [0, 0] : Vec2dNormal([this.velocityX, this.velocityY]);
 
     this.cameraPoint.x = this.x + dir[0] * speed * 10;
     this.cameraPoint.y = this.y + dir[1] * speed * 10;
 
-    camera.centerOn(this.cameraPoint.x, this.cameraPoint.y);
+    camera.centerOn(this.x, this.y);
   }
 }
 

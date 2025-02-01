@@ -57,6 +57,16 @@ function Reflect(a: EzVec, n: EzVec) {
 export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
     const n: EzVec = [a.x - b.x, a.y - b.y];
     const nLen = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
+    const nNormalized = [n[0] / nLen, n[1] / nLen];
+
+    const rSum = a.radius + b.radius;
+    const diff = rSum - nLen;
+
+    a.x += nNormalized[0] * (diff / 2);
+    a.y += nNormalized[1] * (diff / 2);
+
+    b.x -= nNormalized[0] * (diff / 2);
+    b.y += nNormalized[1] * (diff / 2);
 
     n[0] /= nLen;
     n[1] /= nLen;
@@ -64,8 +74,8 @@ export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
     const relVel: EzVec = [a.velocityX - b.velocityX, a.velocityY - b.velocityY];
 
     const reflected = Reflect(relVel, n);
-    a.velocityX = reflected[0];
-    a.velocityY = reflected[1];
-    b.velocityX = -reflected[0];
-    b.velocityY = -reflected[1];
+    a.velocityX = reflected[0] * 0.8;
+    a.velocityY = reflected[1] * 0.8;
+    b.velocityX = -reflected[0] * 0.8;
+    b.velocityY = -reflected[1] * 0.8;
 }

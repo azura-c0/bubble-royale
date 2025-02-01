@@ -21,7 +21,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     this.scene = scene;
     this.scene.add.existing(this);
     this.setScale(1);
-    //this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
+    this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
     this.radius = PLAYER_RADIUS;
     if (state) {
       this.initializePlayer(state);
@@ -35,9 +35,9 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   }
 
   public override update(time: number, dt: number) {
-    // this.arc.x = this.x;
-    // this.arc.y = this.y;
-    this.sync();
+    this.arc.x = this.x;
+    this.arc.y = this.y;
+    //this.sync();
   }
 
   protected sync() {

@@ -1,10 +1,9 @@
 import { Scene } from "phaser";
 import { NetworkManager } from "../utils/NetworkManager";
 import { InputHandler } from "../utils/InputHandler";
-import { ClientPlayer, PlayerPrefab, PlayerServerReference } from "../objects/PlayerPrefab";
+import { ClientPlayer, PlayerPrefab } from "../objects/PlayerPrefab";
 import { Player } from "../schema/Player";
-import { PLAYER_ACCELERATION } from "../../../util/Constants";
-import { CollideCircles, ResolveCircleCollision } from "../../../util/Collision";
+import { CollideCircles, CollideCircleTile, ResolveCircleCollision, ResolveCircleTileCollision } from "../../../util/Collision";
 import { Tile } from "../schema/Tile";
 import { MovePlayer } from "../../../util/Player";
 
@@ -60,6 +59,14 @@ export class Game extends Scene {
           ResolveCircleCollision(player, otherPlayer);
         }
       });
+
+      this._tiles.forEach((tile) => {
+        const [hit, n] = CollideCircleTile(player, tile);
+        if (hit) {
+          ResolveCircleTileCollision(player, tile, n);
+          return;
+        }
+      })
 
       MovePlayer(player, delta);
       player.update(0, 0);
@@ -122,6 +129,7 @@ export class Game extends Scene {
     NetworkManager.getInstance().room.state.tiles.onAdd(
       (tile: Tile) => {
         const newTile = this.add.sprite(tile.x, tile.y, "tile")
+        newTile.setOrigin(0, 0);
         this._tiles.push(newTile);
         console.log(`new tile at ${tile.x}, ${tile.y}`)
         console.log(this._tiles.length);

@@ -1,5 +1,6 @@
 import type { CircleEntity } from "../client/src/schema/CircleEntity";
 import type { Tile } from "../client/src/schema/Tile";
+import { PLAYER_RADIUS, TILE_SIZE } from "./Constants";
 
 type EzVec = [number, number];
 type MovingCircle = {
@@ -26,7 +27,7 @@ export function CollideCircles(a: MovingCircle, b: MovingCircle) {
   return dist < rSum;
 }
 
-export function CollideCircleTile(circle: CircleEntity, tile: Tile): [boolean, [number, number]] {
+export function CollideCircleTile(circle: MovingCircle, tile: Rect): [boolean, [number, number]] {
   const closestX = Clamp(circle.x, tile.x, tile.x + tile.width)
   const closestY = Clamp(circle.y, tile.y, tile.y + tile.height)
   const rSquared = circle.radius * circle.radius;
@@ -40,8 +41,8 @@ export function CollideCircleTile(circle: CircleEntity, tile: Tile): [boolean, [
   const isBottom = closestY > (tile.y + tile.height / 2);
   const isRight = closestX > (tile.x + tile.width / 2);
 
-  const xOffset = Math.abs(closestX - tile.x + tile.width / 2);
-  const yOffset = Math.abs(closestY - tile.y + tile.height / 2);
+  const xOffset = Math.abs(closestX - (tile.x + tile.width / 2));
+  const yOffset = Math.abs(closestY - (tile.y + tile.height / 2));
 
   const topDownBias = yOffset > xOffset;
 
@@ -93,6 +94,21 @@ function Reflect(a: EzVec, n: EzVec) {
   return [a[0] - 2 * dp * n[0], a[1] - 2 * dp * n[1]];
 }
 
+export function ResolveCircleTileCollision(a: MovingCircle, b: Rect, normal: EzVec) {
+    const reflected = Reflect([a.velocityX, a.velocityY], normal)
+    const dx = Math.abs(a.x - (b.x + (b.width/2)));
+    const dy = Math.abs(a.y - (b.y + (b.height/2)));
+
+    const mx = (((TILE_SIZE / 2) - dx) + PLAYER_RADIUS + 1) * normal[0];
+    const my = (((TILE_SIZE / 2) - dy) + PLAYER_RADIUS + 1) * normal[1];
+
+    a.x += mx;
+    a.y += my;
+
+    a.velocityX = reflected[0];
+    a.velocityY = reflected[1];
+}
+
 export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
   const n: EzVec = [a.x - b.x, a.y - b.y];
   const nLen = Math.sqrt(n[0] * n[0] + n[1] * n[1]);
@@ -117,10 +133,6 @@ export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
   a.velocityY = reflected[1] * 0.8;
   b.velocityX = -reflected[0] * 0.8;
   b.velocityY = -reflected[1] * 0.8;
-}
-
-export function ResolveCircleTileCollision(circle: MovingCircle, tile: Tile) {
-
 }
 
 export function CollideRects(a: Rect, b: Rect) {

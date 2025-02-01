@@ -24,21 +24,5 @@ export const HandleInput = (
     }
 
 
-    room.state.players.forEach((otherPlayer) => {
-      if (otherPlayer === player) return;
-      if (CollideCircles(otherPlayer, player)) {
-        ResolveCircleCollision(otherPlayer, player);
-      }
-    });
-
-    room.state.tiles.forEach((tile) => {
-      const [collided, normal] = CollideCircleTile(player, tile);
-
-      if (collided) {
-        // console.log(`collided with tile ${normal}`);
-      }
-    });
-
-    MovePlayer(player, room.clock.deltaTime);
   }
 };

@@ -2,13 +2,37 @@ import { Room, Client } from "@colyseus/core";
 import { Player, MyRoomState } from "./schema/GameState";
 import { HandleInput } from "./messages/HandleInput";
 import { InitializeGame } from "./messages/InitializeGame";
+import { CollideCircles, CollideCircleTile, ResolveCircleCollision } from "../../../util/Collision";
+import { MovePlayer } from "../../../util/Player";
 
 export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
 
   onCreate (options: any) {
     this.setState(new MyRoomState());
-    this.clock.start();
+    this.clock.start()
+    this.clock.setInterval(() => {
+      this.state.players.forEach((player) => {
+        this.state.players.forEach((otherPlayer) => {
+          if (player === otherPlayer) {
+            return;
+          }
+          if (CollideCircles(otherPlayer, player)) {
+            ResolveCircleCollision(otherPlayer, player);
+          }
+        });
+
+        this.state.tiles.forEach((tile) => {
+          const [collided, normal] = CollideCircleTile(player, tile);
+
+          if (collided) {
+            // console.log(`collided with tile ${normal}`);
+          }
+        });
+        MovePlayer(player, this.clock.deltaTime);
+      });
+
+    }, 100);
     InitializeGame(this);
     this.onMessage("input", (client, message: InputMessage) => HandleInput(this, client, message));
   }

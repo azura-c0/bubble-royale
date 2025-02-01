@@ -3,6 +3,7 @@ import { NetworkManager } from "../utils/NetworkManager";
 import { InputHandler } from "../utils/InputHandler";
 import { PlayerPrefab, PlayerServerReference } from "../objects/PlayerPrefab";
 import { Player } from "../schema/Player";
+import { Collision } from "matter";
 
 export class Game extends Scene {
   private _clientPlayer: PlayerPrefab;

@@ -1,5 +1,5 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
-import { PLAYER_RADIUS, TILE_SIZE } from "../../../../util/Constants";
+import { BOOST_MAX, PLAYER_RADIUS, MAX_BUBBLE_RADIUS, TILE_SIZE } from "../../../../util/Constants";
 
 export class CircleEntity extends Schema {
   @type("number") x: number = 0;
@@ -25,6 +25,8 @@ export class Player extends CircleEntity {
   @type("string") color = "";
   @type("number") velocityX = 0;
   @type("number") velocityY = 0;
+  @type("number") boost = BOOST_MAX;
+  @type("boolean") boostEngaged = false;
   @type("number") score = 0;
   inputQueue: InputMessage[] = [];
 
@@ -54,7 +56,7 @@ export class Tile extends Schema {
 
 export class MyRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
-  @type(CircleEntity) bubble = new CircleEntity();
+  @type(CircleEntity) bubble = new CircleEntity(0, 0, MAX_BUBBLE_RADIUS);
   @type([Tile]) tiles = new ArraySchema<Tile>();
   @type([CircleEntity]) collectible = new ArraySchema<CircleEntity>();
 }

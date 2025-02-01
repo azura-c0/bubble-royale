@@ -10,7 +10,7 @@ import { Tile } from "../schema/Tile";
 export class Game extends Scene {
   private _clientPlayer: ClientPlayer;
   private _inputHandler: InputHandler;
-  private _tiles: Phaser.GameObjects.Rectangle[] = [];
+  private _tiles: Phaser.GameObjects.Sprite[] = [];
   private _playerEntities: Map<string, PlayerPrefab> = new Map<
     string,
     PlayerPrefab
@@ -23,6 +23,7 @@ export class Game extends Scene {
   preload() {
     this.load.setPath("assets");
     this.load.image("astronaut", "astronaut.png")
+    this.load.image("tile", "tile.png")
   }
 
   async create() {
@@ -44,9 +45,9 @@ export class Game extends Scene {
     this.initalizeTiles();
   }
 
-  update() {
+  update(time: number, dt: number) {
     for (const player of this._playerEntities.values()) {
-      player.update();
+      player.update(time, dt);
     }
     this._clientPlayer?.handleInput(this._inputHandler);
     this._clientPlayer?.updateCamera(this.cameras.main);
@@ -95,8 +96,8 @@ export class Game extends Scene {
 
   private initalizeTiles() {
     NetworkManager.getInstance().room.state.tiles.onAdd(
-      (tile: Tile) => { 
-        const newTile = this.add.rectangle(tile.x, tile.y, tile.width, tile.height, 0x00000)
+      (tile: Tile) => {
+        const newTile = this.add.sprite(tile.x, tile.y, "tile")
         this._tiles.push(newTile);
         console.log(`new tile at ${tile.x}, ${tile.y}`)
         console.log(this._tiles.length);

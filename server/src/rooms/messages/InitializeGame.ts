@@ -36,7 +36,7 @@ function generateRandomPosition(entities: RectEntity[], size: { width: number, h
   let thisEntity: RectEntity;
 
   do {
-    position = new Vector2(getRandomInt(0, 300), getRandomInt(0, 300));
+    position = new Vector2(getRandomInt(0, 600), getRandomInt(0, 600));
     thisEntity = new RectEntity(position.x, position.y, size.width, size.height);
     console.log(thisEntity);
     attempts++;

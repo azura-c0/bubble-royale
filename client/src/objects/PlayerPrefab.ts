@@ -33,8 +33,8 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     });
   }
 
-  public override update() {
-    MovePlayer(this);
+  public override update(time: number, dt: number) {
+    MovePlayer(this, dt);
     this.sync();
   }
 

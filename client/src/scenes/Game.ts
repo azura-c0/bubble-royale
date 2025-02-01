@@ -32,7 +32,7 @@ export class Game extends Scene {
   async create() {
     this.cameras.main.roundPixels = false;
     NetworkManager.getInstance().initialize();
-    await NetworkManager.getInstance().connectToRoom();
+    await NetworkManager.getInstance().connectToRoom("hamster_cheekz");
 
     this._inputHandler = new InputHandler(this, {
       up: ["W", Phaser.Input.Keyboard.KeyCodes.UP],

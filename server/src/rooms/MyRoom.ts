@@ -9,6 +9,7 @@ import {
   ResolveCircleTileCollision,
 } from "../../../util/Collision";
 import { MovePlayer } from "../../../util/Player";
+import { IJoinOptions } from "../../../util/types";
 
 export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
@@ -59,12 +60,12 @@ export class MyRoom extends Room<MyRoomState> {
         }
       });
 
-      MovePlayer(player, delta);
+      MovePlayer(player, delta, player.boostEngaged);
     });
   }
 
-  onJoin(client: Client, options: any) {
-    this.state.players.set(client.sessionId, new Player());
+  onJoin(client: Client, options: IJoinOptions) {
+    this.state.players.set(client.sessionId, new Player(options.name));
 
     this.state.players.get(client.sessionId).x = Math.random() * 800;
     this.state.players.get(client.sessionId).y = Math.random() * 600;

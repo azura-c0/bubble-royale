@@ -130,6 +130,15 @@ export class Game extends Scene {
     });
   }
 
+  private colorToNumber(hexStr: string) : number {
+    const col = Phaser.Display.Color.HexStringToColor(hexStr);
+    const red = (col.red << 16) >>> 0;
+    const green = (col.green << 8) >>> 0;
+    const blue = (col.blue) >>> 0;
+
+    return red | green | blue;
+  }
+
   private initializePlayerEntities() {
     NetworkManager.getInstance().room.state.players.onAdd(
       (player: Player, sessionId: string) => {
@@ -142,7 +151,7 @@ export class Game extends Scene {
               player.x,
               player.y,
               player.velocityX, player.velocityY,
-              0x0000ff,
+              this.colorToNumber(player.color),
               player.name,
               player.boost,
               player.boostEngaged,

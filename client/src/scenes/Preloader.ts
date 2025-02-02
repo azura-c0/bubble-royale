@@ -16,6 +16,6 @@ export class Preloader extends Scene {
 
   create() 
   {
-    this.scene.start("Lobby");
+    this.scene.start("MainMenu");
   }
 }

@@ -10,7 +10,7 @@ import {
   ResolveCircleTileCollision,
 } from "../../../util/Collision";
 import { MovePlayer } from "../../../util/Player";
-import { IJoinOptions } from "../../../util/types";
+import { IPlayerData } from "../../../util/types";
 import {
   BOOST_INCREASE,
   BOOST_MAX,
@@ -157,7 +157,7 @@ export class MyRoom extends Room<MyRoomState> {
     }
   }
 
-  onJoin(client: Client, options: IJoinOptions) {
+  onJoin(client: Client, options: IPlayerData) {
     this.state.players.set(client.sessionId, new Player(options.name));
 
     if (this.clients.length === 1) {

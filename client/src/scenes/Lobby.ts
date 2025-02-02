@@ -1,5 +1,6 @@
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../util/Constants";
 import { NetworkManager } from "../utils/NetworkManager";
+import { IPlayerData } from "../../../util/types"
 
 export class Lobby extends Phaser.Scene {
   constructor() {
@@ -17,16 +18,11 @@ export class Lobby extends Phaser.Scene {
     })
   }
 
-  async create() {
-    const bg = this.add.image(0, 0, "lobbybg");
-    bg.setOrigin(0, 0);
-    bg.setScale(2);
-
-    //this.add.text(100, 100, "Lobby", { color: "white" });
+  async create(data: IPlayerData) {
     const nm = NetworkManager.getInstance();
 
     nm.initialize();
-    await nm.connectToRoom("hamster");
+    await nm.connectToRoom(data.name, data.color);
 
     nm.room.state.listen("gameStarted", (started) => {
       if (started) {

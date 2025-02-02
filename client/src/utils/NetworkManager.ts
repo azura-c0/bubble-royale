@@ -21,9 +21,10 @@ export class NetworkManager {
 
   public async connectToRoom(
     name: string,
+    color: string
   ): Promise<Colyseus.Room<MyRoomState>> {
     try {
-      this.room = await this._client.joinOrCreate("my_room", { name });
+      this.room = await this._client.joinOrCreate("my_room", { name, color });
       return this.room;
     } catch (e) {
       console.error(e);

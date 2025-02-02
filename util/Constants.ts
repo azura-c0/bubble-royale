@@ -10,7 +10,7 @@ export const BOOST_FRICTION = 0.9997;
 export const BOOST_ACCELERATION = 0.005;
 export const BOOST_MAX_VELOCITY = 0.3;
 export const BOOST_MAX = 300;
-export const BOOST_INCREASE = 10;
+export const BOOST_INCREASE = 50;
 
 // TILES AND STRUCTURES
 export const TILE_SIZE = 32;

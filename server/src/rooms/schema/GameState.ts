@@ -22,6 +22,7 @@ export class Player extends CircleEntity {
   @type("number") boost = 30;
   @type("boolean") boostEngaged = false;
   @type("number") score = 0;
+  @type("number") oxygen = 100;
   inputQueue: InputMessage[] = [];
 
   constructor(name: string) {

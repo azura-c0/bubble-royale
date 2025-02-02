@@ -18,6 +18,7 @@ import {
   BUBBLE_SPEED,
   BUBBLE_STATE_CHANGE_INTERVAL,
   MAX_BUBBLE_RADIUS,
+  PLAYER_OXYGEN_RATE,
   PLAYER_RADIUS,
   WORLD_HEIGHT,
   WORLD_WIDTH,
@@ -140,13 +141,22 @@ export class MyRoom extends Room<MyRoomState> {
         if (player.boost > BOOST_MAX) {
           player.boost = BOOST_MAX;
         }
-        console.log("GRABBED!!!!!")
         this.state.collectible.deleteAt(i);
       }
     });
   }
 
- 
+  private checkIfPlayerIsInBubble(player: Player) {
+    if (!(CollideCircles({ velocityX: 0, velocityY: 0, ...this.state.bubble }, player)) {
+      player.oxygen -= PLAYER_OXYGEN_RATE;
+    } else {
+      player.oxygen += (PLAYER_OXYGEN_RATE * 1.5);
+      if (player.oxygen > 100) {
+        player.oxygen = 100;
+      }
+    }
+  }
+
   onJoin(client: Client, options: IJoinOptions) {
     this.state.players.set(client.sessionId, new Player(options.name));
 

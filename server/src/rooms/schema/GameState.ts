@@ -25,11 +25,12 @@ export class Player extends CircleEntity {
   @type("number") oxygen = 100;
   inputQueue: InputMessage[] = [];
 
-  constructor(name: string) {
+  constructor(name: string, color: string) {
     super(0, 0, PLAYER_RADIUS);
     this.velocityX = 0.01;
     this.velocityY = 0.01;
     this.name = name;
+    this.color = color;
   }
 }
 

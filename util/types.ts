@@ -1,4 +1,4 @@
 export interface IPlayerData {
   name: string;
-  color: number;
+  color: string;
 }

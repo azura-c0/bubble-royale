@@ -164,7 +164,7 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onJoin(client: Client, options: IPlayerData) {
-    this.state.players.set(client.sessionId, new Player(options.name));
+    this.state.players.set(client.sessionId, new Player(options.name, options.color));
 
     if (this.clients.length === 1) {
       this._hostClient = client;

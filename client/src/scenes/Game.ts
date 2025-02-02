@@ -227,7 +227,7 @@ export class Game extends Scene {
           //Initialize other player entities
           this._playerEntities.set(
             sessionId,
-            new PlayerPrefab(this, player.x, player.y, player.velocityX, player.velocityY, 0x00ff00, player.name, player.boost, player.boostEngaged, player.oxygen, player),
+            new PlayerPrefab(this, player.x, player.y, player.velocityX, player.velocityY, this.colorToNumber(player.color), player.name, player.boost, player.boostEngaged, player.oxygen, player),
           );
         }
       },

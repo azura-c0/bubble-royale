@@ -3,8 +3,9 @@ import { NetworkManager } from "../utils/NetworkManager";
 import { IPlayerData } from "../../../util/types";
 
 export class Lobby extends Phaser.Scene {
-  private _nameListOffset = 0;
+  private _nameListOffset: number = 0;
   private _playerList: Map<string, Phaser.GameObjects.Text> = new Map();
+  private _isHost: boolean = false;
 
   constructor() {
     super("Lobby");
@@ -64,7 +65,8 @@ export class Lobby extends Phaser.Scene {
     });
 
     nm.room.onMessage("host", (isHost) => {
-      if (isHost) {
+      this._isHost = isHost;
+      if (this._isHost) {
         this.add.text(
           SCREEN_WIDTH / 2 - 385,
           SCREEN_HEIGHT - 100,
@@ -92,5 +94,24 @@ export class Lobby extends Phaser.Scene {
           });
       }
     });
+
+    if (!this._isHost) {
+    }
+  }
+
+  update() {
+    if (this._isHost) {
+      this.add.text(
+        SCREEN_WIDTH / 2 - 385,
+        SCREEN_HEIGHT - 100,
+        "Waiting for host to start the game...",
+        {
+          color: "white",
+          fontSize: "32px",
+          fontStyle: "bold",
+          fontFamily: "ProggyClean",
+        },
+      );
+    }
   }
 }

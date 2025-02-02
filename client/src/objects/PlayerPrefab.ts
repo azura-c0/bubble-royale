@@ -8,6 +8,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   protected viewDir: [number, number];
   protected arc: Phaser.GameObjects.Arc;
   protected text: Phaser.GameObjects.Text;
+  protected jetpack: Phaser.GameObjects.Particles.ParticleEmitter;
 
   constructor(
     scene: Phaser.Scene,
@@ -22,8 +23,8 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     super(scene, x, y, "astronaut");
     this.scene = scene;
     this.scene.add.existing(this);
-    this.setScale(1);
-    this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
+    this.setOrigin(0.5, 0.25);
+   // this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
     this.text = scene.add.text(x, y, this.name, {
       color: "red",
       fontSize: 10,
@@ -39,7 +40,11 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     });
     this.text.x = this.x - this.text.width / 2;
     this.text.setDepth(1);
-    
+    this.jetpack = this.scene.add.particles(this.x, this.y, "smoke", {
+      lifespan: 1000,
+      emitting: false,
+      frequency: 10
+    });
     this.radius = PLAYER_RADIUS;
     if (state) {
       this.initializePlayer(state);
@@ -53,12 +58,16 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   }
 
   public override update(time: number, dt: number) {
-    this.arc.x = this.x;
-    this.arc.y = this.y;
+    //this.arc.x = this.x;
+    //this.arc.y = this.y;
     if (this.text) {
       this.text.x = this.x - this.text.width / 2;
       this.text.y = this.y - PLAYER_RADIUS - this.text.height - 5;
     }
+
+    const speed = Vec2dLen([this.velocityX, this.velocityY]);
+      this.jetpack.emitParticleAt(this.x, this.y, 1);
+
     this.sync();
   }
 

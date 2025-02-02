@@ -6,6 +6,7 @@ import { Player } from "../schema/Player";
 import { CollideCircles, CollideCircleTile, ResolveCircleCollision, ResolveCircleTileCollision } from "../../../util/Collision";
 import { Tile } from "../schema/Tile";
 import { MovePlayer } from "../../../util/Player";
+import { MAX_BUBBLE_RADIUS } from "../../../util/Constants";
 
 const FIXED_TIMESTEP = 1000 / 60;
 export class Game extends Scene {
@@ -17,7 +18,9 @@ export class Game extends Scene {
   private _playerEntities: Map<string, PlayerPrefab> = new Map<
     string,
     PlayerPrefab
-  >();
+    >();
+  
+  private _bubble: Phaser.GameObjects.Arc;
 
   constructor() {
     super("Game");
@@ -27,6 +30,7 @@ export class Game extends Scene {
     this.load.setPath("assets");
     this.load.image("astronaut", "astronaut.png")
     this.load.image("tile", "tile.png")
+    this.load.image("smoke", "smoke.png");
   }
 
   async create() {
@@ -41,11 +45,13 @@ export class Game extends Scene {
       right: ["D", Phaser.Input.Keyboard.KeyCodes.RIGHT],
       action: [Phaser.Input.Keyboard.KeyCodes.SPACE],
     });
-    const bg = this.add.image(0, 0, "background");
+    const bg = this.add.tileSprite(0, 0, 1024 * 4, 768 * 4, "background");
     //bg.setScale(3, 3);
     this._inputHandler.startListening();
     this.initializePlayerEntities();
     this.initalizeTiles();
+    this._bubble = this.add.arc(0, 0, MAX_BUBBLE_RADIUS, 0, 360, false, 0x0000ff, 0.2);
+    this.initializeBubble();
   }
 
   fixedTick(delta: number) {
@@ -92,6 +98,14 @@ export class Game extends Scene {
         ResolveCircleCollision(this._clientPlayer, player)
       }
     }
+  }
+
+  private initializeBubble() {
+    NetworkManager.getInstance().room.state.listen("bubble", (bubble) => {
+      this._bubble.x = bubble.x;
+      this._bubble.y = bubble.y;
+      this._bubble.radius = bubble.radius;
+    });
   }
 
   private initializePlayerEntities() {

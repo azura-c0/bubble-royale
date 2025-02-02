@@ -97,6 +97,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
 
   protected sync() {
     const serverState: Player = this.getData("state");
+    if (!serverState) return;
     this.x = Phaser.Math.Linear(this.x, serverState.x, 0.2);
     this.y = Phaser.Math.Linear(this.y, serverState.y, 0.2);
     this.velocityX = Phaser.Math.Linear(this.velocityX, serverState.velocityX, 0.2);

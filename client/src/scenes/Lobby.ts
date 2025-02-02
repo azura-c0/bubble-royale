@@ -1,3 +1,4 @@
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../util/Constants";
 import { NetworkManager } from "../utils/NetworkManager";
 
 export class Lobby extends Phaser.Scene {
@@ -20,7 +21,7 @@ export class Lobby extends Phaser.Scene {
 
     nm.room.onMessage("host", (isHost) => {
       if (isHost) {
-        this.add.text(this.scene, 200, "Start Game", { color: "white", fontSize: "24px" })
+        this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "Start Game", { color: "white", fontSize: "24px" })
           .setInteractive()
           .on("pointerdown", () => {
             nm.room.send("start");

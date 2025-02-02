@@ -1,6 +1,6 @@
 import { Client } from "colyseus";
 import { MyRoom } from "../MyRoom";
-import { PLAYER_ACCELERATION } from "../../../../util/Constants";
+import { BOOST_ACCELERATION, PLAYER_ACCELERATION } from "../../../../util/Constants";
 import { MovePlayer } from "../../../../util/Player";
 import { CollideCircles, ResolveCircleCollision, CollideCircleTile } from "../../../../util/Collision";
 import { Player } from "../schema/GameState";
@@ -10,16 +10,26 @@ export const HandleInput = (
   player: Player
 ) => {
   if (player) {
+    const acceleration = player.boostEngaged ? BOOST_ACCELERATION : PLAYER_ACCELERATION;
+
     if (input.up) {
-      player.velocityY -= PLAYER_ACCELERATION;
+      player.velocityY -= acceleration;
     } else if (input.down) {
-      player.velocityY += PLAYER_ACCELERATION;
+      player.velocityY += acceleration;
     }
 
     if (input.left) {
-      player.velocityX -= PLAYER_ACCELERATION;
+      player.velocityX -= acceleration;
     } else if (input.right) {
-      player.velocityX += PLAYER_ACCELERATION;
+      player.velocityX += acceleration;
+    }
+
+    if (input.action && player.boost > 0) {
+      player.boostEngaged = true;
+      player.boost--;
+      console.log("Boost engaged", player.boost);
+    } else {
+      player.boostEngaged = false;
     }
   }
 };

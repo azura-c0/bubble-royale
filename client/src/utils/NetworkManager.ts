@@ -19,9 +19,9 @@ export class NetworkManager {
     this._client = new Colyseus.Client("ws://localhost:2567");
   }
 
-  public async connectToRoom(): Promise<Colyseus.Room<MyRoomState>> {
+  public async connectToRoom(name: string): Promise<Colyseus.Room<MyRoomState>> {
     try {
-      this.room = await this._client.joinOrCreate("my_room");
+      this.room = await this._client.joinOrCreate("my_room", { name: name });
       return this.room;
     } catch (e) {
       console.error(e)

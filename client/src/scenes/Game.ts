@@ -6,7 +6,7 @@ import { Player } from "../schema/Player";
 import { CollideCircles, CollideCircleTile, ResolveCircleCollision, ResolveCircleTileCollision } from "../../../util/Collision";
 import { Tile } from "../schema/Tile";
 import { MovePlayer } from "../../../util/Player";
-import { MAX_BUBBLE_RADIUS, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
+import { MAX_BUBBLE_RADIUS, SCREEN_HEIGHT, SCREEN_WIDTH, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
 import { CircleEntity } from "../schema/CircleEntity";
 
 const FIXED_TIMESTEP = 1000 / 60;
@@ -22,6 +22,7 @@ export class Game extends Scene {
     >();
   private miniMap: Phaser.Cameras.Scene2D.Camera;
   private _bubble: Phaser.GameObjects.Arc;
+  private _cameraIterator = 0;
 
   private shardEmitter: Phaser.GameObjects.Particles.ParticleEmitter;
 
@@ -79,6 +80,24 @@ export class Game extends Scene {
     this.shardEmitter.setDepth(5);
 
     this.initializeBubble();
+
+    this.events.on('cameraLeft', () => {
+      this._cameraIterator--;
+      if (this._cameraIterator < 0) {
+        this._cameraIterator = this._playerEntities.size - 1;
+      }
+      const players = [...this._playerEntities.values()];
+      this.cameras.main.startFollow(players[this._cameraIterator]);
+    })
+
+    this.events.on('cameraRight', () => {
+      this._cameraIterator++;
+      if (this._cameraIterator > this._playerEntities.size - 1) {
+        this._cameraIterator = 0;
+      }
+      const players = [...this._playerEntities.values()];
+      this.cameras.main.startFollow(players[this._cameraIterator]);
+    })
   }
 
   fixedTick(delta: number) {
@@ -115,6 +134,9 @@ export class Game extends Scene {
       this._accumulator -= FIXED_TIMESTEP;
       this.fixedTick(FIXED_TIMESTEP);
     }
+    for (const [,player] of this._playerEntities) {
+      player.draw();
+    }
   }
 
   private initializeBubble() {
@@ -130,6 +152,15 @@ export class Game extends Scene {
     });
   }
 
+  private colorToNumber(hexStr: string) : number {
+    const col = Phaser.Display.Color.HexStringToColor(hexStr);
+    const red = (col.red << 16) >>> 0;
+    const green = (col.green << 8) >>> 0;
+    const blue = (col.blue) >>> 0;
+
+    return red | green | blue;
+  }
+
   private initializePlayerEntities() {
     NetworkManager.getInstance().room.state.players.onAdd(
       (player: Player, sessionId: string) => {
@@ -142,7 +173,7 @@ export class Game extends Scene {
               player.x,
               player.y,
               player.velocityX, player.velocityY,
-              0x0000ff,
+              this.colorToNumber(player.color),
               player.name,
               player.boost,
               player.boostEngaged,
@@ -161,7 +192,7 @@ export class Game extends Scene {
           //Initialize other player entities
           this._playerEntities.set(
             sessionId,
-            new PlayerPrefab(this, player.x, player.y, player.velocityX, player.velocityY, 0x00ff00, player.name, player.boost, player.boostEngaged, player),
+            new PlayerPrefab(this, player.x, player.y, player.velocityX, player.velocityY, 0x00ff00, player.name, player.boost, player.boostEngaged, player.oxygen, player),
           );
         }
       },
@@ -170,6 +201,9 @@ export class Game extends Scene {
     NetworkManager.getInstance().room.state.players.onRemove((player, key) => {
       const playerEnt = this._playerEntities.get(key);
       playerEnt?.die();
+      if (playerEnt === this._clientPlayer) {
+        this.events.emit('playerDead');
+      }
       this._playerEntities.delete(key);
     })
   }

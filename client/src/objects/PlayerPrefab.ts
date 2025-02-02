@@ -106,7 +106,15 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public die(): void {
     this.destroy();
     this.blood.emitParticleAt(this.x, this.y, 16);
+  }
 
+  public draw() {
+    if (!(this instanceof ClientPlayer)) {
+      const angle = Vec2dNormal([this.velocityX, this.velocityY]);
+      const viewDirTargetAngle = Math.atan2(angle[0], -angle[1]);
+      this.rotation = lerpAngle(this.rotation, viewDirTargetAngle, 0.9);
+      this.playerColor.rotation = this.rotation;
+    }
   }
 
   public override update(time: number, dt: number) {
@@ -129,7 +137,9 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
       ];
       let jetpack;
       if (this.boostActive) {
-        this.scene.cameras.main.shake(100, 0.001);
+        if (this instanceof ClientPlayer) {
+          this.scene.cameras.main.shake(100, 0.001);
+        }
         this.emitterCounter = 6;
         jetpack = this.boostjetpack;
       } else {
@@ -147,7 +157,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     const shake = Math.random() * 100;
     const oxyPct = (100 - this.oxygen)/ 100;
     this.setScale(1.0 + (oxyPct  / (2 + shake)));
-    if (this.oxygen < 100) {
+    if (this.oxygen < 100 && this instanceof ClientPlayer) {
       this.scene.cameras.main.shake(100, 0.0025 * oxyPct);
     }
   }

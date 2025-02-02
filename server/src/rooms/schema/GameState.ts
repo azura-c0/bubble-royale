@@ -19,7 +19,7 @@ export class Player extends CircleEntity {
   @type("string") color = "";
   @type("number") velocityX = 0;
   @type("number") velocityY = 0;
-  @type("number") boost = 30;
+  @type("number") boost = 100;
   @type("boolean") boostEngaged = false;
   @type("number") score = 0;
   @type("number") oxygen = 100;

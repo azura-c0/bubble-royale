@@ -89,6 +89,7 @@ export class Game extends Scene {
     this.initializeCollectibles();
     this._bubble = this.add.arc(0, 0, MAX_BUBBLE_RADIUS, 0, 360, false, 0x0000ff, 0.2);
     this.miniMap.centerOn(this._bubble.x, this._bubble.y);
+    this.sound.volume = 0.5
 
     this.shardEmitter = this.add.particles(0, 0, "shards", {
       lifespan: 500,

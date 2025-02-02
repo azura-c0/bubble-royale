@@ -19,7 +19,7 @@ export const createTileShape = (
           break;
         case "x":
           state.collectible.push(
-            new CircleEntity(offset.x + x, offset.y + y, 1),
+            new CircleEntity(offset.x + x * TILE_SIZE, offset.y + y * TILE_SIZE, 1),
           );
           break;
         case " ":

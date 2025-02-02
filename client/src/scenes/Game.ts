@@ -11,7 +11,6 @@ import { MAX_BUBBLE_RADIUS, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Cons
 const FIXED_TIMESTEP = 1000 / 60;
 export class Game extends Scene {
   private _accumulator = 0;
-
   private _clientPlayer: ClientPlayer;
   private _inputHandler: InputHandler;
   private _tiles: Phaser.GameObjects.Sprite[] = [];
@@ -36,8 +35,6 @@ export class Game extends Scene {
 
   async create() {
     this.cameras.main.roundPixels = false;
-    NetworkManager.getInstance().initialize();
-    await NetworkManager.getInstance().connectToRoom("hamster_cheekz");
 
     this._inputHandler = new InputHandler(this, {
       up: ["W", Phaser.Input.Keyboard.KeyCodes.UP],

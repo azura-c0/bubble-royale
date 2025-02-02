@@ -62,7 +62,7 @@ function generateRandomPosition(
       size.width,
       size.height,
     );
-    console.log(thisEntity);
+
     attempts++;
   } while (
     entities.some((entity) => CollideRects(entity, thisEntity)) &&

@@ -53,4 +53,5 @@ export class MyRoomState extends Schema {
   @type(CircleEntity) bubble = new CircleEntity(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, MAX_BUBBLE_RADIUS);
   @type([Tile]) tiles = new ArraySchema<Tile>();
   @type([CircleEntity]) collectible = new ArraySchema<CircleEntity>();
+  @type("boolean") gameStarted = false;
 }

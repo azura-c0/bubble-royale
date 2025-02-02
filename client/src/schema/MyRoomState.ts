@@ -15,4 +15,5 @@ export class MyRoomState extends Schema {
     @type(CircleEntity) public bubble: CircleEntity = new CircleEntity();
     @type([ Tile ]) public tiles: ArraySchema<Tile> = new ArraySchema<Tile>();
     @type([ CircleEntity ]) public collectible: ArraySchema<CircleEntity> = new ArraySchema<CircleEntity>();
+    @type("boolean") public gameStarted!: boolean;
 }

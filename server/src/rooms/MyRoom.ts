@@ -35,10 +35,21 @@ export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
   elapsedTime: number = 0;
   readonly fixedTimeStep: number = 1000 / 60;
+  private _hostClient: Client;
   private _bubbleDirection: BubbleDirection = "up";
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
+    this.onMessage("start", (client) => {
+      if (client === this._hostClient) {
+        this.start();
+        this.state.gameStarted = true;
+        this.setPrivate(true);
+      }
+    });
+  }
+
+  start() {
     this.setSimulationInterval((deltaTime) => {
       this.elapsedTime += deltaTime;
 
@@ -119,8 +130,14 @@ export class MyRoom extends Room<MyRoomState> {
     });
   }
 
+ 
   onJoin(client: Client, options: IJoinOptions) {
     this.state.players.set(client.sessionId, new Player(options.name));
+
+    if (this.clients.length === 1) {
+      this._hostClient = client;
+      this._hostClient.send("host", true);
+    }
 
     const position = generateRandomPosition(
       this.state.players,
@@ -146,53 +163,62 @@ export class MyRoom extends Room<MyRoomState> {
         if (bubble.y - bubble.radius <= 0) {
           this._bubbleDirection = "down";
         }
-        bubble.y -= BUBBLE_SPEED
+        bubble.y -= BUBBLE_SPEED;
         break;
       case "down":
         if (bubble.y + bubble.radius >= WORLD_HEIGHT) {
           this._bubbleDirection = "up";
         }
-        bubble.y += BUBBLE_SPEED
+        bubble.y += BUBBLE_SPEED;
         break;
       case "left":
         if (bubble.x - bubble.radius <= 0) {
           this._bubbleDirection = "right";
         }
-        bubble.x -= BUBBLE_SPEED
+        bubble.x -= BUBBLE_SPEED;
         break;
       case "right":
         if (bubble.x + bubble.radius >= WORLD_WIDTH) {
           this._bubbleDirection = "left";
         }
-        bubble.x += BUBBLE_SPEED
+        bubble.x += BUBBLE_SPEED;
         break;
       case "up-left":
         if (bubble.x - bubble.radius <= 0 || bubble.y - bubble.radius <= 0) {
           this._bubbleDirection = "down-right";
         }
-        bubble.x -= BUBBLE_SPEED
-        bubble.y -= BUBBLE_SPEED
+        bubble.x -= BUBBLE_SPEED;
+        bubble.y -= BUBBLE_SPEED;
         break;
       case "up-right":
-        if (bubble.x + bubble.radius >= WORLD_WIDTH || bubble.y - bubble.radius <= 0) {
+        if (
+          bubble.x + bubble.radius >= WORLD_WIDTH ||
+          bubble.y - bubble.radius <= 0
+        ) {
           this._bubbleDirection = "down-left";
         }
-        bubble.x += BUBBLE_SPEED
-        bubble.y -= BUBBLE_SPEED
+        bubble.x += BUBBLE_SPEED;
+        bubble.y -= BUBBLE_SPEED;
         break;
       case "down-left":
-        if (bubble.x - bubble.radius <= 0 || bubble.y + bubble.radius >= WORLD_HEIGHT) {
+        if (
+          bubble.x - bubble.radius <= 0 ||
+          bubble.y + bubble.radius >= WORLD_HEIGHT
+        ) {
           this._bubbleDirection = "up-right";
         }
-        bubble.x -= BUBBLE_SPEED
-        bubble.y += BUBBLE_SPEED
+        bubble.x -= BUBBLE_SPEED;
+        bubble.y += BUBBLE_SPEED;
         break;
       case "down-right":
-        if (bubble.x + bubble.radius >= WORLD_WIDTH || bubble.y + bubble.radius >= WORLD_HEIGHT) {
+        if (
+          bubble.x + bubble.radius >= WORLD_WIDTH ||
+          bubble.y + bubble.radius >= WORLD_HEIGHT
+        ) {
           this._bubbleDirection = "up-left";
         }
-        bubble.x += BUBBLE_SPEED
-        bubble.y += BUBBLE_SPEED
+        bubble.x += BUBBLE_SPEED;
+        bubble.y += BUBBLE_SPEED;
         break;
     }
 

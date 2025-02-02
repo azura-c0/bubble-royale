@@ -139,7 +139,10 @@ export class MyRoom extends Room<MyRoomState> {
 
   private handlePlayerCollectibleCollisions(player: Player) {
     this.state.collectible.forEach((collectible, i) => {
-      if (player.boost < BOOST_MAX && CollideCircles(player, { velocityX: 0, velocityY: 0, ...collectible })) {
+      if (
+        player.boost < BOOST_MAX &&
+        CollideCircles(player, { velocityX: 0, velocityY: 0, ...collectible })
+      ) {
         player.boost += BOOST_INCREASE;
         if (player.boost > BOOST_MAX) {
           player.boost = BOOST_MAX;
@@ -150,13 +153,18 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   private checkIfPlayerIsInBubble(session: string, player: Player) {
-    if (!(CollideCircles({ velocityX: 0, velocityY: 0, ...this.state.bubble }, player))) {
+    if (
+      !CollideCircles(
+        { velocityX: 0, velocityY: 0, ...this.state.bubble },
+        player,
+      )
+    ) {
       player.oxygen -= PLAYER_OXYGEN_RATE;
       if (player.oxygen <= 0) {
         this.state.players.delete(session);
       }
     } else {
-      player.oxygen += (PLAYER_OXYGEN_RATE * 1.5);
+      player.oxygen += PLAYER_OXYGEN_RATE * 1.5;
       if (player.oxygen > 100) {
         player.oxygen = 100;
       }
@@ -164,7 +172,10 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onJoin(client: Client, options: IPlayerData) {
-    this.state.players.set(client.sessionId, new Player(options.name, options.color));
+    this.state.players.set(
+      client.sessionId,
+      new Player(options.name, options.color),
+    );
 
     if (this.clients.length === 1) {
       this._hostClient = client;
@@ -182,6 +193,11 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onLeave(client: Client, consented: boolean) {
+    if (this._hostClient === client) {
+      this._hostClient = this.clients[0];
+      this._hostClient.send("host", true);
+    }
+    this.state.players.delete(client.sessionId);
     console.log(client.sessionId, "left!");
   }
 

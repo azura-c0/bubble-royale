@@ -4,6 +4,7 @@ import { IPlayerData } from "../../../util/types";
 
 export class Lobby extends Phaser.Scene {
   private _nameListOffset = 0;
+  private _playerList: Map<string, Phaser.GameObjects.Text> = new Map();
 
   constructor() {
     super("Lobby");
@@ -11,16 +12,14 @@ export class Lobby extends Phaser.Scene {
 
   preload() {
     this.load.setPath("assets");
-    this.load.image("lobbybg", "lobbybg.png");
-    this.load.spritesheet("startbutton", "startbutton.png", {
-      frameWidth: 64,
-      frameHeight: 32,
-      startFrame: 0,
-      endFrame: 1,
-    });
+    this.load.image("rockbg", "rockbg.png");
   }
 
   async create(data: IPlayerData) {
+    const bg = this.add.image(0, 0, "rockbg");
+    bg.setOrigin(0, 0);
+    bg.setScale(1.5);
+
     const nm = NetworkManager.getInstance();
 
     nm.initialize();
@@ -33,15 +32,52 @@ export class Lobby extends Phaser.Scene {
       }
     });
 
-    nm.room.state.players.onAdd((player) => {
-      this._nameListOffset += 20;
-      this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + this._nameListOffset, player.name)
+    this.add.text(20, 50, "Players:", {
+      color: "white",
+      fontSize: "48px",
+      fontStyle: "bold",
+      fontFamily: "ProggyClean",
+    });
+
+    nm.room.state.players.onAdd((player, sessionId) => {
+      this._nameListOffset += 25;
+      const playerText = this.add.text(
+        20,
+        80 + this._nameListOffset,
+        player.name,
+        {
+          color: player.color,
+          fontSize: "32px",
+          fontStyle: "bold",
+          fontFamily: "ProggyClean",
+        },
+      );
+      this._playerList.set(sessionId, playerText);
+    });
+
+    nm.room.state.players.onRemove((_player, sessionId) => {
+      this._nameListOffset -= 25;
+      this._playerList.get(sessionId)?.destroy();
+      this._playerList.forEach((text) => {
+        text.y -= 25;
+      });
     });
 
     nm.room.onMessage("host", (isHost) => {
       if (isHost) {
+        this.add.text(
+          SCREEN_WIDTH / 2 - 385,
+          SCREEN_HEIGHT - 100,
+          "You are the host, press start when all players have joined",
+          {
+            color: "white",
+            fontSize: "32px",
+            fontStyle: "bold",
+            fontFamily: "ProggyClean",
+          },
+        );
         const button = this.add
-          .sprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "startbutton", 0)
+          .sprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 35, "startbutton", 0)
           .setScale(2)
           .setInteractive()
           .on("pointerdown", () => {
@@ -54,11 +90,6 @@ export class Lobby extends Phaser.Scene {
           .on("click", () => {
             nm.room.send("start");
           });
-        // this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "Start Game", { color: "white", fontSize: "24px" })
-        //   .setInteractive()
-        //   .on("pointerdown", () => {
-        //     nm.room.send("start");
-        //   })
       }
     });
   }

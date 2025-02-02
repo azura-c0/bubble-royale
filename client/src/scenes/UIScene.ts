@@ -6,7 +6,7 @@ export class UIScene extends Phaser.Scene {
     private meter: Phaser.GameObjects.Image;
 
     constructor() {
-        super({ key: 'UIScene', active: true });
+        super({ key: 'UIScene', active: false });
     }
 
     preload() {

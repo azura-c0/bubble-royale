@@ -26,7 +26,7 @@ export class Game extends Scene {
   private shardEmitter: Phaser.GameObjects.Particles.ParticleEmitter;
 
   constructor() {
-    super("Game");
+    super({ key: "Game", active: false });
   }
 
   preload() {
@@ -47,7 +47,7 @@ export class Game extends Scene {
       down: ["S", Phaser.Input.Keyboard.KeyCodes.DOWN],
       left: ["A", Phaser.Input.Keyboard.KeyCodes.LEFT],
       right: ["D", Phaser.Input.Keyboard.KeyCodes.RIGHT],
-      action: [Phaser.Input.Keyboard.KeyCodes.SPACE],
+      action: [Phaser.Input.Keyboard.KeyCodes.SHIFT],
     });
     const bg = this.add.tileSprite(0, 0, WORLD_WIDTH * 2, WORLD_HEIGHT * 2, "background");
     this.miniMap = this.cameras.add(16, 16, 200, 200).setZoom(0.1).setName('mini');

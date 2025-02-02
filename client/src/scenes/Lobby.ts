@@ -6,8 +6,23 @@ export class Lobby extends Phaser.Scene {
     super("Lobby");
   }
 
+  preload() {
+    this.load.setPath("assets");
+    this.load.image("lobbybg", "lobbybg.png")
+    this.load.spritesheet("startbutton", "startbutton.png", {
+      frameWidth: 64,
+      frameHeight: 32,
+      startFrame: 0,
+      endFrame: 1
+    })
+  }
+
   async create() {
-    this.add.text(100, 100, "Lobby", { color: "white" });
+    const bg = this.add.image(0, 0, "lobbybg");
+    bg.setOrigin(0, 0);
+    bg.setScale(2);
+
+    //this.add.text(100, 100, "Lobby", { color: "white" });
     const nm = NetworkManager.getInstance();
 
     nm.initialize();
@@ -16,16 +31,30 @@ export class Lobby extends Phaser.Scene {
     nm.room.state.listen("gameStarted", (started) => {
       if (started) {
         this.scene.start("Game");
+        this.scene.launch("UIScene")
       }
     });
 
     nm.room.onMessage("host", (isHost) => {
       if (isHost) {
-        this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "Start Game", { color: "white", fontSize: "24px" })
+        const button = this.add.sprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "startbutton", 0)
+          .setScale(2)
           .setInteractive()
           .on("pointerdown", () => {
+            button.setFrame(1);
+          })
+          .on("pointerup", () => {
+            button.setFrame(0);
             nm.room.send("start");
           })
+          .on("click", () => {
+            nm.room.send("start");
+          })
+        // this.add.text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "Start Game", { color: "white", fontSize: "24px" })
+        //   .setInteractive()
+        //   .on("pointerdown", () => {
+        //     nm.room.send("start");
+        //   })
       }
     });
 

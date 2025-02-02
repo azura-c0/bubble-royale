@@ -79,7 +79,7 @@ export class Game extends Scene {
         }
       })
 
-      MovePlayer(player, delta);
+      MovePlayer(player, delta, false);
       player.update(0, 0);
     });
     this._inputHandler.sync();

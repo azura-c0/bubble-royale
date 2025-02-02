@@ -12,6 +12,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   private emitterCounter = 0;
   protected playerColor: Phaser.GameObjects.Rectangle;
 
+
   constructor(
     scene: Phaser.Scene,
     x: number,

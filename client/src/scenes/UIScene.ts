@@ -91,7 +91,10 @@ export class UIScene extends Phaser.Scene {
       "kicked the bucket",
       "was gibbed",
       "met their maker",
-      "went to live on a farm with other doggies"
+      "went to live on a farm with other doggies",
+      "was sent to the shadow realm",
+      "went out for milk and cigarettes",
+      "is in a worse place now",
     ]
 
     game.events.on('deathMessage', (name: string) => {

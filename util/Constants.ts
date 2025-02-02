@@ -8,7 +8,7 @@ export const PLAYER_OXYGEN_RATE = 1;
 // PLAYER BOOST SETTINGS
 export const BOOST_FRICTION = 0.9997;
 export const BOOST_ACCELERATION = 0.009;
-export const BOOST_MAX_VELOCITY = 0.3;
+export const BOOST_MAX_VELOCITY = 0.33;
 export const BOOST_MAX = 300;
 export const BOOST_INCREASE = 50;
 

@@ -6,6 +6,7 @@ export class Lobby extends Phaser.Scene {
   private _nameListOffset: number = 0;
   private _playerList: Map<string, Phaser.GameObjects.Text> = new Map();
   private _isHost: boolean = false;
+  private _waitingText: Phaser.GameObjects.Text;
 
   constructor() {
     super("Lobby");
@@ -95,23 +96,22 @@ export class Lobby extends Phaser.Scene {
       }
     });
 
-    if (!this._isHost) {
-    }
+    this._waitingText = this.add.text(
+      SCREEN_WIDTH / 2,
+      SCREEN_HEIGHT - 100,
+      "Waiting for host to start the game...",
+      {
+        color: "white",
+        fontSize: "32px",
+        fontStyle: "bold",
+        fontFamily: "ProggyClean",
+      },
+    ).setOrigin(0.5, 0.5);
   }
 
   update() {
     if (this._isHost) {
-      this.add.text(
-        SCREEN_WIDTH / 2 - 385,
-        SCREEN_HEIGHT - 100,
-        "Waiting for host to start the game...",
-        {
-          color: "white",
-          fontSize: "32px",
-          fontStyle: "bold",
-          fontFamily: "ProggyClean",
-        },
-      );
+      this._waitingText.setAlpha(0);
     }
   }
 }

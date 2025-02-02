@@ -16,7 +16,7 @@ export class NetworkManager {
   }
 
   public initialize(): void {
-    this._client = new Colyseus.Client("https://us-ewr-6371d2f0.colyseus.cloud");
+    this._client = new Colyseus.Client("wss://us-ewr-6371d2f0.colyseus.cloud");
   }
 
   public async connectToRoom(name: string): Promise<Colyseus.Room<MyRoomState>> {

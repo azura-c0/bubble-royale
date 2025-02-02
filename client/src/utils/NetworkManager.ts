@@ -17,7 +17,7 @@ export class NetworkManager {
   }
 
   public initialize(): void {
-    this._client = new Colyseus.Client("ws://localhost:2567"); // SWITCH TO wss://us-ewr-6371d2f0.colyseus.cloud FOR PRODUCTION
+    this._client = new Colyseus.Client(import.meta.env.GAME_SERVER); // SWITCH TO wss://us-ewr-6371d2f0.colyseus.cloud FOR PRODUCTION
   }
 
   public async connectToRoom(

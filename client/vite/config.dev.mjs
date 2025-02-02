@@ -14,4 +14,7 @@ export default defineConfig({
   server: {
     port: 8080,
   },
+  define: {
+    'import.meta.env.GAME_SERVER': '(\"ws://localhost:2567\")'
+  }
 });

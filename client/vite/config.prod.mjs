@@ -43,5 +43,8 @@ export default defineConfig({
     },
     plugins: [
         phasermsg()
-    ]
+    ],
+    define: {
+        'import.meta.env.GAME_SERVER': '(\"wss://us-ewr-6371d2f0.colyseus.cloud\")'
+    }
 });

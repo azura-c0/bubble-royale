@@ -9,6 +9,7 @@ export const BOOST_FRICTION = 0.9997;
 export const BOOST_ACCELERATION = 0.005;
 export const BOOST_MAX_VELOCITY = 0.3;
 export const BOOST_MAX = 300;
+export const BOOST_INCREASE = 10;
 
 // TILES AND STRUCTURES
 export const TILE_SIZE = 32;
@@ -32,6 +33,9 @@ export const BUBBLE_SHRINK_RATE = 0.9999;
 export const BUBBLE_SPEED = 1;
 export const BUBBLE_STATE_CHANGE_INTERVAL = 10000;
 
+export const SCREEN_WIDTH = 1024;
+export const SCREEN_HEIGHT = 768;
+
 // WORLD SETTINGS
-export const WORLD_WIDTH = 1024 * 3;
-export const WORLD_HEIGHT = 768 * 3;
+export const WORLD_WIDTH = SCREEN_WIDTH * 3;
+export const WORLD_HEIGHT = SCREEN_HEIGHT * 3;

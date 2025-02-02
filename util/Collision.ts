@@ -147,3 +147,20 @@ export function CollideRects(a: Rect, b: Rect) {
 function Clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
+
+export function lerpAngle(start: number, end: number, t: number): number {
+  // Normalize to -π to π
+  start = ((start + Math.PI) % (2 * Math.PI)) - Math.PI;
+  end = ((end + Math.PI) % (2 * Math.PI)) - Math.PI;
+
+  let diff = end - start;
+
+  // Take shortest path
+  if (diff > Math.PI) {
+      diff -= 2 * Math.PI;
+  } else if (diff < -Math.PI) {
+      diff += 2 * Math.PI;
+  }
+
+  return start + diff * t;
+}

@@ -12,6 +12,8 @@ import {
 import { MovePlayer } from "../../../util/Player";
 import { IJoinOptions } from "../../../util/types";
 import {
+  BOOST_INCREASE,
+  BOOST_MAX,
   BUBBLE_SHRINK_RATE,
   BUBBLE_SPEED,
   BUBBLE_STATE_CHANGE_INTERVAL,
@@ -127,6 +129,20 @@ export class MyRoom extends Room<MyRoomState> {
       });
 
       MovePlayer(player, delta, player.boostEngaged);
+      this.handlePlayerCollectibleCollisions(player);
+    });
+  }
+
+  private handlePlayerCollectibleCollisions(player: Player) {
+    this.state.collectible.forEach((collectible, i) => {
+      if (player.boost < BOOST_MAX && CollideCircles(player, { velocityX: 0, velocityY: 0, ...collectible })) {
+        player.boost += BOOST_INCREASE;
+        if (player.boost > BOOST_MAX) {
+          player.boost = BOOST_MAX;
+        }
+        console.log("GRABBED!!!!!")
+        this.state.collectible.deleteAt(i);
+      }
     });
   }
 

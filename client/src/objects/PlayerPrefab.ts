@@ -1,7 +1,7 @@
 import { Player } from "../schema/Player";
 import { PLAYER_ACCELERATION, PLAYER_RADIUS } from '../../../util/Constants';
 import { InputHandler } from "../utils/InputHandler";
-import { Vec2dLen, Vec2dNormal } from "../../../util/Collision";
+import { lerpAngle, Vec2dLen, Vec2dNormal } from "../../../util/Collision";
 
 export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public radius: number;
@@ -21,6 +21,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     public velocityY: number,
     public color: number,
     public name: string,
+    public boost: number,
     state?: Player,
   ) {
     super(scene, x, y, "astronaut");
@@ -100,6 +101,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     this.y = Phaser.Math.Linear(this.y, serverState.y, 0.2);
     this.velocityX = Phaser.Math.Linear(this.velocityX, serverState.velocityX, 0.2);
     this.velocityY = Phaser.Math.Linear(this.velocityY, serverState.velocityY, 0.2);
+    this.boost = serverState.boost;
   }
 }
 
@@ -115,9 +117,10 @@ export class ClientPlayer extends PlayerPrefab {
     velocityY: number,
     color: number,
     name: string,
+    boost: number,
     state?: Player,
   ) {
-    super(scene, x, y, velocityX, velocityY, color, name, state);
+    super(scene, x, y, velocityX, velocityY, color, name, boost, state);
     this.cameraPoint = {
       x,
       y
@@ -145,12 +148,13 @@ export class ClientPlayer extends PlayerPrefab {
 
     this.viewDirTarget = Vec2dNormal(this.viewDirTarget);
     const viewDirTargetAngle = Math.atan2(this.viewDirTarget[0], -this.viewDirTarget[1]);
-    this.rotation = Phaser.Math.Linear(this.rotation, viewDirTargetAngle, 0.2);
+    this.rotation = lerpAngle(this.rotation, viewDirTargetAngle, 0.2);
     this.playerColor.rotation = this.rotation;
   }
 
   protected override sync() {
     super.sync();
+    this.scene.events.emit('boost', this.boost);
   }
 
   public updateCamera(camera: Phaser.Cameras.Scene2D.Camera) {

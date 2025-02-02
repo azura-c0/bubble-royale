@@ -7,6 +7,7 @@ import { CollideCircles, CollideCircleTile, ResolveCircleCollision, ResolveCircl
 import { Tile } from "../schema/Tile";
 import { MovePlayer } from "../../../util/Player";
 import { MAX_BUBBLE_RADIUS, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
+import { CircleEntity } from "../schema/CircleEntity";
 
 const FIXED_TIMESTEP = 1000 / 60;
 export class Game extends Scene {
@@ -15,12 +16,15 @@ export class Game extends Scene {
   private _clientPlayer: ClientPlayer;
   private _inputHandler: InputHandler;
   private _tiles: Phaser.GameObjects.Sprite[] = [];
+  private _collectibles: Record<number, Phaser.GameObjects.Sprite> = {};
   private _playerEntities: Map<string, PlayerPrefab> = new Map<
     string,
     PlayerPrefab
     >();
   private miniMap: Phaser.Cameras.Scene2D.Camera;
   private _bubble: Phaser.GameObjects.Arc;
+
+  private shardEmitter: Phaser.GameObjects.Particles.ParticleEmitter;
 
   constructor() {
     super("Game");
@@ -32,6 +36,8 @@ export class Game extends Scene {
     this.load.image("tile", "tile.png")
     this.load.image("smoke", "smoke.png");
     this.load.image("arrow", "arrow.png")
+    this.load.image("collectible", "collectible.png")
+    this.load.image("shards", "shards.png")
   }
 
   async create() {
@@ -54,8 +60,19 @@ export class Game extends Scene {
     this._inputHandler.startListening();
     this.initializePlayerEntities();
     this.initalizeTiles();
+    this.initializeCollectibles();
     this._bubble = this.add.arc(0, 0, MAX_BUBBLE_RADIUS, 0, 360, false, 0x0000ff, 0.2);
     this.miniMap.centerOn(this._bubble.x, this._bubble.y);
+
+    this.shardEmitter = this.add.particles(0, 0, "shards", {
+      lifespan: 500,
+      emitting: false,
+      frequency: 100,
+      speed: { min: 50, max: 150 },
+      scale: { start: 1.0, end: 0 },
+      rotate: { start: 0, end: 360 },
+    })
+    this.shardEmitter.setDepth(5);
 
     this.initializeBubble();
   }
@@ -96,15 +113,6 @@ export class Game extends Scene {
     }
   }
 
-
-  private handlePlayerCollisions() {
-    for (const player of this._playerEntities.values().filter(p => p !== this._clientPlayer)) {
-      if (CollideCircles(this._clientPlayer, player)) {
-        ResolveCircleCollision(this._clientPlayer, player)
-      }
-    }
-  }
-
   private initializeBubble() {
     NetworkManager.getInstance().room.state.bubble.onChange(() => {
       this._bubble.x = NetworkManager.getInstance().room.state.bubble.x;
@@ -123,7 +131,6 @@ export class Game extends Scene {
       (player: Player, sessionId: string) => {
         // Initialize client player
         if (sessionId === NetworkManager.getInstance().room.sessionId) {
-          
           this._playerEntities.set(
             sessionId,
             this._clientPlayer = new ClientPlayer(
@@ -133,6 +140,7 @@ export class Game extends Scene {
               player.velocityX, player.velocityY,
               0x0000ff,
               player.name,
+              player.boost,
               player,
             )
           );
@@ -154,14 +162,29 @@ export class Game extends Scene {
     );
   }
 
+  private initializeCollectibles() {
+    NetworkManager.getInstance().room.state.collectible.onAdd(
+      (circle: CircleEntity, key) => {
+        const collectible = this.add.sprite(circle.x, circle.y, "collectible");
+        // collectible.setOrigin(0, 0);
+        this._collectibles[key] = collectible;
+      }
+    )
+    NetworkManager.getInstance().room.state.collectible.onRemove(
+      (circle, key) => {
+        this._collectibles[key].destroy();
+        delete this._collectibles[key];
+        this.shardEmitter.emitParticleAt(circle.x, circle.y, 8);
+      }
+    )
+  }
+
   private initalizeTiles() {
     NetworkManager.getInstance().room.state.tiles.onAdd(
       (tile: Tile) => {
         const newTile = this.add.sprite(tile.x, tile.y, "tile")
         newTile.setOrigin(0, 0);
         this._tiles.push(newTile);
-        console.log(`new tile at ${tile.x}, ${tile.y}`)
-        console.log(this._tiles.length);
       },
     );
   }

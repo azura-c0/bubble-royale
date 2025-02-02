@@ -10,7 +10,7 @@ import { getRandomInt, MyRoom } from "../MyRoom";
 import { RectEntity } from "../objects/Entity";
 import { createTileShape } from "../objects/TileShape";
 import { Vector2 } from "../objects/Vector2";
-import { Tile } from "../schema/GameState";
+import { CircleEntity, Tile } from "../schema/GameState";
 
 export const InitializeGame = (room: MyRoom) => {
   const entities: RectEntity[] = [];

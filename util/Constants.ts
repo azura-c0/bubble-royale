@@ -3,7 +3,7 @@ export const PLAYER_FRICTION = 0.9997;
 export const PLAYER_ACCELERATION = 0.008;
 export const PLAYER_RADIUS = 14;
 export const PLAYER_MAX_VELOCITY = 0.15;
-export const PLAYER_OXYGEN_RATE = 10;
+export const PLAYER_OXYGEN_RATE = 1;
 
 // PLAYER BOOST SETTINGS
 export const BOOST_FRICTION = 0.9997;

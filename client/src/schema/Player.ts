@@ -16,4 +16,5 @@ export class Player extends CircleEntity {
     @type("number") public boost!: number;
     @type("boolean") public boostEngaged!: boolean;
     @type("number") public score!: number;
+    @type("number") public oxygen!: number;
 }

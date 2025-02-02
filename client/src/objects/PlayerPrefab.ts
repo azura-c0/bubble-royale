@@ -6,9 +6,11 @@ import { lerpAngle, Vec2dLen, Vec2dNormal } from "../../../util/Collision";
 export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public radius: number;
   protected viewDir: [number, number];
-  protected arc: Phaser.GameObjects.Arc;
   protected text: Phaser.GameObjects.Text;
   protected jetpack: Phaser.GameObjects.Particles.ParticleEmitter;
+  protected boostjetpack: Phaser.GameObjects.Particles.ParticleEmitter;
+  protected blood: Phaser.GameObjects.Particles.ParticleEmitter;
+
   private emitterCounter = 0;
   protected playerColor: Phaser.GameObjects.Rectangle;
 
@@ -22,13 +24,15 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     public color: number,
     public name: string,
     public boost: number,
+    public boostActive: boolean,
+    public oxygen: number,
     state?: Player,
   ) {
     super(scene, x, y, "astronaut");
     this.scene = scene;
     this.scene.add.existing(this);
     this.setOrigin(0.5, 0.25);
-   // this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
+    // this.arc = scene.add.arc(this.x, this.y, PLAYER_RADIUS, 0, 360, false, 0xff0000, 128);
     this.text = scene.add.text(x, y, this.name, {
       color: "red",
       fontSize: 10,
@@ -53,13 +57,44 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
       emitting: false,
       frequency: 100000,
       scale: { start: 1.0, end: 0 },
-      rotate: { start: 0, end: 180}
+      rotate: { start: 0, end: 180 }
     });
+    this.boostjetpack = this.scene.add.particles(0, 0, "boostSmoke", {
+      lifespan: 1000,
+      emitting: false,
+      frequency: 100000,
+      scale: { start: 1.5, end: 0.2 },
+      rotate: { start: 0, end: 180 }
+    });
+
     this.jetpack.setDepth(2.5);
+    this.boostjetpack.setDepth(2.5);
+    this.blood = this.scene.add.particles(0, 0, "blood", {
+      frame: [0, 1, 2, 3, 4],
+      lifespan: 3000,
+      emitting: false,
+      frequency: 1000,
+      alpha: {start: 3, end: 0},
+      scale: { min: 1, max: 2.5 },
+      speed: { min: 5, max: 50},
+      rotate: {start: 0, end: 180 }
+    })
+    this.blood.setDepth(2.5)
+
     this.radius = PLAYER_RADIUS;
+
+    this.once('destroy', () => {
+      this.text.destroy();
+      this.jetpack.destroy();
+      this.boostjetpack.destroy();
+      this.playerColor.destroy();
+    })
+
     if (state) {
       this.initializePlayer(state);
     }
+    // this.die();
+
   }
 
   private initializePlayer(player: Player) {
@@ -68,9 +103,16 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     });
   }
 
+  public die(): void {
+    this.destroy();
+    this.blood.emitParticleAt(this.x, this.y, 16);
+
+  }
+
   public override update(time: number, dt: number) {
-    //this.arc.x = this.x;
-    //this.arc.y = this.y;
+    if (!this.active) {
+      return;
+    }
     if (this.text) {
       this.text.x = this.x - this.text.width / 2;
       this.text.y = this.y - PLAYER_RADIUS - this.text.height - 5;
@@ -85,14 +127,29 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
         this.x + Math.cos(this.rotation + Math.PI/1.8) * 40,
         this.y + Math.sin(this.rotation + Math.PI/1.8) * 40,
       ];
-      this.jetpack.emitParticleAt(emitAt1[0], emitAt1[1], 1);
-      this.jetpack.emitParticleAt(emitAt2[0], emitAt2[1], 1);
-      this.emitterCounter = 8;
+      let jetpack;
+      if (this.boostActive) {
+        this.scene.cameras.main.shake(100, 0.001);
+        this.emitterCounter = 6;
+        jetpack = this.boostjetpack;
+      } else {
+        this.emitterCounter = 8;
+        jetpack = this.jetpack;
+      }
+      jetpack.emitParticleAt(emitAt1[0], emitAt1[1], 1);
+      jetpack.emitParticleAt(emitAt2[0], emitAt2[1], 1);
+
     }
 
     this.sync();
     this.playerColor.x = this.x;
     this.playerColor.y = this.y;
+    const shake = Math.random() * 100;
+    const oxyPct = (100 - this.oxygen)/ 100;
+    this.setScale(1.0 + (oxyPct  / (2 + shake)));
+    if (this.oxygen < 100) {
+      this.scene.cameras.main.shake(100, 0.0025 * oxyPct);
+    }
   }
 
   protected sync() {
@@ -103,6 +160,8 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     this.velocityX = Phaser.Math.Linear(this.velocityX, serverState.velocityX, 0.2);
     this.velocityY = Phaser.Math.Linear(this.velocityY, serverState.velocityY, 0.2);
     this.boost = serverState.boost;
+    this.boostActive = serverState.boostEngaged;
+    this.oxygen = serverState.oxygen
   }
 }
 
@@ -119,9 +178,11 @@ export class ClientPlayer extends PlayerPrefab {
     color: number,
     name: string,
     boost: number,
+    boostActive: boolean,
+    oxygen: number,
     state?: Player,
   ) {
-    super(scene, x, y, velocityX, velocityY, color, name, boost, state);
+    super(scene, x, y, velocityX, velocityY, color, name, boost, boostActive, oxygen, state);
     this.cameraPoint = {
       x,
       y
@@ -131,6 +192,9 @@ export class ClientPlayer extends PlayerPrefab {
   }
 
   public handleInput(input: InputHandler) {
+    if (!this.active) {
+      return;
+    }
     if (input.input["up"]) {
       this.velocityY -= PLAYER_ACCELERATION;
       this.viewDirTarget[1] = -1;
@@ -155,7 +219,9 @@ export class ClientPlayer extends PlayerPrefab {
 
   protected override sync() {
     super.sync();
-    this.scene.events.emit('boost', this.boost);
+    if (this.scene) {
+      this.scene.events.emit('boost', this.boost);
+    }
   }
 
   public updateCamera(camera: Phaser.Cameras.Scene2D.Camera) {
@@ -183,6 +249,9 @@ export class PlayerServerReference extends PlayerPrefab {
       playerPrefab.velocityY,
       playerPrefab.color,
       serverState.name,
+      playerPrefab.boost,
+      playerPrefab.boostActive,
+      playerPrefab.oxygen,
       serverState
     );
 

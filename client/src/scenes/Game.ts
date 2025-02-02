@@ -34,9 +34,16 @@ export class Game extends Scene {
     this.load.image("astronaut", "astronaut.png")
     this.load.image("tile", "tile.png")
     this.load.image("smoke", "smoke.png");
+    this.load.image("boostSmoke", "boostSmoke.png")
     this.load.image("arrow", "arrow.png")
     this.load.image("collectible", "collectible.png")
     this.load.image("shards", "shards.png")
+    this.load.spritesheet("blood", "blood.png", {
+      frameWidth: 12,
+      frameHeight: 12,
+      startFrame: 0,
+      endFrame: 4
+    })
   }
 
   async create() {
@@ -138,6 +145,8 @@ export class Game extends Scene {
               0x0000ff,
               player.name,
               player.boost,
+              player.boostEngaged,
+              player.oxygen,
               player,
             )
           );
@@ -152,11 +161,17 @@ export class Game extends Scene {
           //Initialize other player entities
           this._playerEntities.set(
             sessionId,
-            new PlayerPrefab(this, player.x, player.y, player.velocityX, player.velocityY, 0x00ff00, player.name, player),
+            new PlayerPrefab(this, player.x, player.y, player.velocityX, player.velocityY, 0x00ff00, player.name, player.boost, player.boostEngaged, player),
           );
         }
       },
     );
+
+    NetworkManager.getInstance().room.state.players.onRemove((player, key) => {
+      const playerEnt = this._playerEntities.get(key);
+      playerEnt?.die();
+      this._playerEntities.delete(key);
+    })
   }
 
   private initializeCollectibles() {

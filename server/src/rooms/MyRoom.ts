@@ -95,7 +95,9 @@ export class MyRoom extends Room<MyRoomState> {
     InitializeGame(this);
     this.onMessage("input", (client, message: InputMessage) => {
       const player = this.state.players.get(client.sessionId);
-      player.inputQueue.push(message);
+      if (player) {
+        player.inputQueue.push(message);
+      }
     });
   }
 
@@ -104,7 +106,7 @@ export class MyRoom extends Room<MyRoomState> {
     this.bubbleMovement(this.state.bubble);
 
     // Handle Input
-    this.state.players.forEach((player) => {
+    this.state.players.forEach((player, session) => {
       let input: InputMessage;
 
       while ((input = player.inputQueue.shift())) {
@@ -131,6 +133,7 @@ export class MyRoom extends Room<MyRoomState> {
 
       MovePlayer(player, delta, player.boostEngaged);
       this.handlePlayerCollectibleCollisions(player);
+      this.checkIfPlayerIsInBubble(session, player);
     });
   }
 
@@ -146,9 +149,12 @@ export class MyRoom extends Room<MyRoomState> {
     });
   }
 
-  private checkIfPlayerIsInBubble(player: Player) {
+  private checkIfPlayerIsInBubble(session: string, player: Player) {
     if (!(CollideCircles({ velocityX: 0, velocityY: 0, ...this.state.bubble }, player))) {
       player.oxygen -= PLAYER_OXYGEN_RATE;
+      if (player.oxygen <= 0) {
+        this.state.players.delete(session);
+      }
     } else {
       player.oxygen += (PLAYER_OXYGEN_RATE * 1.5);
       if (player.oxygen > 100) {

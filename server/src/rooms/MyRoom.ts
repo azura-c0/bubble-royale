@@ -12,6 +12,7 @@ import {
 import { MovePlayer } from "../../../util/Player";
 import { IJoinOptions } from "../../../util/types";
 import {
+  MAX_BUBBLE_RADIUS,
   PLAYER_RADIUS,
   WORLD_HEIGHT,
   WORLD_WIDTH,
@@ -74,8 +75,10 @@ export class MyRoom extends Room<MyRoomState> {
   onJoin(client: Client, options: IJoinOptions) {
     this.state.players.set(client.sessionId, new Player(options.name));
 
-    this.state.players.get(client.sessionId).x = WORLD_WIDTH / 2;
-    this.state.players.get(client.sessionId).y = WORLD_HEIGHT / 2;
+    const position = generateRandomPosition(this.state.players);
+    const player = this.state.players.get(client.sessionId);
+    player.x = position.x;
+    player.y = position.y;
     console.log(client.sessionId, "joined!");
   }
 
@@ -97,8 +100,8 @@ function generateRandomPosition(
   let position: { x: number; y: number };
   do {
     position = {
-      x: Math.random() * WORLD_WIDTH,
-      y: Math.random() * WORLD_HEIGHT,
+      x: getRandomInt((WORLD_WIDTH / 2) - (MAX_BUBBLE_RADIUS / 2), (WORLD_WIDTH / 2) + (MAX_BUBBLE_RADIUS / 2)),
+      y: getRandomInt((WORLD_HEIGHT / 2) - (MAX_BUBBLE_RADIUS / 2), (WORLD_HEIGHT / 2) + (MAX_BUBBLE_RADIUS / 2)),
     };
     detectedCollision = false;
     playerEntities.forEach((player) => {
@@ -123,3 +126,9 @@ function generateRandomPosition(
   }
   return position;
 }
+
+export function getRandomInt(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }

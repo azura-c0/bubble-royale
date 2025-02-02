@@ -1,6 +1,6 @@
 import { CollideRects } from "../../../../util/Collision"
 import { TILE_SIZE } from "../../../../util/Constants";
-import { MyRoom } from "../MyRoom";
+import { getRandomInt, MyRoom } from "../MyRoom";
 import { RectEntity } from "../objects/Entity";
 import { createTileShape } from "../objects/TileShape";
 import { Vector2 } from "../objects/Vector2";
@@ -48,8 +48,4 @@ function generateRandomPosition(entities: RectEntity[], size: { width: number, h
   return position;
 }
 
-  function getRandomInt(min: number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
+  

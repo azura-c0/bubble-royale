@@ -127,10 +127,10 @@ export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
   const relVel: EzVec = [a.velocityX - b.velocityX, a.velocityY - b.velocityY];
 
   const reflected = Reflect(relVel, n);
-  a.velocityX = reflected[0] * 0.8;
-  a.velocityY = reflected[1] * 0.8;
-  b.velocityX = -reflected[0] * 0.8;
-  b.velocityY = -reflected[1] * 0.8;
+  a.velocityX = reflected[0];
+  a.velocityY = reflected[1];
+  b.velocityX = -reflected[0];
+  b.velocityY = -reflected[1];
 }
 
 export function CollideRects(a: Rect, b: Rect) {

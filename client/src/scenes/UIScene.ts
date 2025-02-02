@@ -1,4 +1,4 @@
-import { SCREEN_HEIGHT } from "../../../util/Constants";
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../util/Constants";
 
 export class UIScene extends Phaser.Scene {
     private arrow: Phaser.GameObjects.Image;
@@ -15,6 +15,18 @@ export class UIScene extends Phaser.Scene {
         this.load.image("mapBorder", "mapBorder.png");
         this.load.image("boostbar", "boostbar.png");
         this.load.image("boostmeter", "boostmeter.png")
+        this.load.spritesheet("leftbutton", "leftbutton.png", {
+            frameWidth: 24,
+            frameHeight: 24,
+            startFrame: 0,
+            endFrame: 1
+        });
+        this.load.spritesheet("rightbutton", "rightbutton.png", {
+            frameWidth: 24,
+            frameHeight: 24,
+            startFrame: 0,
+            endFrame: 1
+        });
     }
 
     create() {
@@ -36,6 +48,31 @@ export class UIScene extends Phaser.Scene {
 
         game.events.on('boost', (boost: number) => {
             this.meter.setCrop(0, 0, this.meter.width * (boost / 300), this.meter.height);
+        });
+
+        game.events.on('playerDead', () => {
+            const left = this.add.sprite(SCREEN_WIDTH / 2 - 64, SCREEN_HEIGHT - 32, "leftbutton", 0)
+                .setScale(2)
+                .setInteractive()
+                .on('pointerdown', () => {
+                    left.setFrame(1);
+                })
+                .on('pointerup', () => {
+                    left.setFrame(0);
+                    game.events.emit('cameraLeft');
+                })
+
+            const right = this.add.sprite(SCREEN_WIDTH / 2 + 64, SCREEN_HEIGHT - 32, "rightbutton", 0)
+                .setScale(2)
+                .setInteractive()
+                .on('pointerdown', () => {
+                    right.setFrame(1);
+                })
+                .on('pointerup', () => {
+                    right.setFrame(0);
+                    game.events.emit('cameraRight');
+                })
+
         });
     }
 }

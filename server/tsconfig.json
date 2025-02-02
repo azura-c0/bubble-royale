@@ -5,6 +5,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "strict": false,
+    "skipLibCheck": true,
     "allowJs": true,
     "strictNullChecks": false,
     "esModuleInterop": true,

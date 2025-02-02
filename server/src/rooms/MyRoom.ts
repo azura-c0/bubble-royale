@@ -38,6 +38,7 @@ export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
   elapsedTime: number = 0;
   readonly fixedTimeStep: number = 1000 / 60;
+  private _winner: string;
   private _hostClient: Client;
   private _bubbleDirection: BubbleDirection = "up";
 
@@ -168,6 +169,16 @@ export class MyRoom extends Room<MyRoomState> {
       if (player.oxygen > 100) {
         player.oxygen = 100;
       }
+    }
+    if (!this._winner) {
+      this.checkWinCondition();
+    }
+  }
+
+  private checkWinCondition() {
+    if (this.state.players.size === 1) {
+      this._winner = this.state.players.values().next().value.name;
+      this.broadcast("win", this._winner);
     }
   }
 

@@ -6,7 +6,7 @@ import { Player } from "../schema/Player";
 import { CollideCircles, CollideCircleTile, ResolveCircleCollision, ResolveCircleTileCollision } from "../../../util/Collision";
 import { Tile } from "../schema/Tile";
 import { MovePlayer } from "../../../util/Player";
-import { MAX_BUBBLE_RADIUS, SCREEN_HEIGHT, SCREEN_WIDTH, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
+import { MAX_BUBBLE_RADIUS, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
 import { CircleEntity } from "../schema/CircleEntity";
 
 const FIXED_TIMESTEP = 1000 / 60;
@@ -119,6 +119,7 @@ export class Game extends Scene {
       const players = [...this._playerEntities.values()];
       this.cameras.main.startFollow(players[this._cameraIterator]);
     })
+
   }
 
   fixedTick(delta: number) {
@@ -159,7 +160,7 @@ export class Game extends Scene {
     this._inputHandler.sync();
   }
 
-  update(time: number, dt: number) {
+  update(_time: number, dt: number) {
     if (!this._clientPlayer) {
       return;
     }
@@ -232,7 +233,7 @@ export class Game extends Scene {
       },
     );
 
-    NetworkManager.getInstance().room.state.players.onRemove((player, key) => {
+    NetworkManager.getInstance().room.state.players.onRemove((_player, key) => {
       const playerEnt = this._playerEntities.get(key);
       playerEnt?.die();
       if (playerEnt === this._clientPlayer) {

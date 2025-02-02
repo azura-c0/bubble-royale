@@ -5,6 +5,7 @@ export class UIScene extends Phaser.Scene {
   private arrow: Phaser.GameObjects.Image;
   private bar: Phaser.GameObjects.Image;
   private meter: Phaser.GameObjects.Image;
+  private eliminated?: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: "UIScene", active: false });
@@ -81,6 +82,48 @@ export class UIScene extends Phaser.Scene {
           game.events.emit("cameraRight");
         });
     });
+
+    const deathMessages = [
+      "was eliminated",
+      "exploded",
+      "died in the vacuum of space",
+      "wasn't fast enough",
+      "kicked the bucket",
+      "was gibbed",
+      "met their maker",
+      "went to live on a farm with other doggies"
+    ]
+
+    game.events.on('deathMessage', (name: string) => {
+      const message = Math.floor(Math.random() * deathMessages.length);
+
+      if (this.eliminated) {
+        this.eliminated.destroy();
+        this.eliminated = undefined;
+      }
+
+      this.eliminated = this.add.text(SCREEN_WIDTH - 32, 64, name + " " + deathMessages[message], {
+        color: "#ffffff",
+        fontFamily: 'ProggyClean',
+        fontSize: 32,
+        shadow: {
+          blur: 2,
+          fill: true,
+          color: "black"
+        },
+        stroke: "black",
+        strokeThickness: 4
+      });
+      this.eliminated.setOrigin(1, 0.5);
+
+      setTimeout(() => {
+        if (this.eliminated) {
+          this.eliminated.destroy();
+          this.eliminated = undefined;
+        }
+      }, 5000);
+
+    })
 
     NetworkManager.getInstance().room.onMessage("win", (name: string) => {
       this.add

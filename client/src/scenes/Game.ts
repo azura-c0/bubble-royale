@@ -6,7 +6,7 @@ import { Player } from "../schema/Player";
 import { CollideCircles, CollideCircleTile, ResolveCircleCollision, ResolveCircleTileCollision } from "../../../util/Collision";
 import { Tile } from "../schema/Tile";
 import { MovePlayer } from "../../../util/Player";
-import { MAX_BUBBLE_RADIUS, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
+import { MAX_BUBBLE_RADIUS, SCREEN_WIDTH, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
 import { CircleEntity } from "../schema/CircleEntity";
 
 const FIXED_TIMESTEP = 1000 / 60;
@@ -23,6 +23,8 @@ export class Game extends Scene {
   private miniMap: Phaser.Cameras.Scene2D.Camera;
   private _bubble: Phaser.GameObjects.Arc;
   private _cameraIterator = 0;
+
+  private eliminated?: Phaser.GameObjects.Text;
 
   private shardEmitter: Phaser.GameObjects.Particles.ParticleEmitter;
 
@@ -234,8 +236,20 @@ export class Game extends Scene {
       },
     );
 
+    const deathMessages = [
+      "was eliminated",
+      "exploded",
+      "died in the vacuum of space",
+      "wasn't fast enough",
+      "kicked the bucket",
+      "was gibbed",
+      "met their maker",
+      "went to live on a farm with other doggies"
+    ]
+
     NetworkManager.getInstance().room.state.players.onRemove((_player, key) => {
       const playerEnt = this._playerEntities.get(key);
+      this.events.emit('deathMessage', playerEnt?.name ?? "A player");
       playerEnt?.die();
       if (playerEnt === this._clientPlayer) {
         this.events.emit('playerDead');

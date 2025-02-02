@@ -147,7 +147,7 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   private checkIfPlayerIsInBubble(player: Player) {
-    if (!(CollideCircles({ velocityX: 0, velocityY: 0, ...this.state.bubble }, player)) {
+    if (!(CollideCircles({ velocityX: 0, velocityY: 0, ...this.state.bubble }, player))) {
       player.oxygen -= PLAYER_OXYGEN_RATE;
     } else {
       player.oxygen += (PLAYER_OXYGEN_RATE * 1.5);

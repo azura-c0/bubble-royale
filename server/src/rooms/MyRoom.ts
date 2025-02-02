@@ -1,6 +1,6 @@
 import { Room, Client } from "@colyseus/core";
-import { MapSchema } from "@colyseus/schema";
-import { Player, MyRoomState } from "./schema/GameState";
+import { ArraySchema, MapSchema } from "@colyseus/schema";
+import { Player, MyRoomState, Tile } from "./schema/GameState";
 import { HandleInput } from "./messages/HandleInput";
 import { InitializeGame } from "./messages/InitializeGame";
 import {
@@ -75,7 +75,10 @@ export class MyRoom extends Room<MyRoomState> {
   onJoin(client: Client, options: IJoinOptions) {
     this.state.players.set(client.sessionId, new Player(options.name));
 
-    const position = generateRandomPosition(this.state.players);
+    const position = generateRandomPosition(
+      this.state.players,
+      this.state.tiles,
+    );
     const player = this.state.players.get(client.sessionId);
     player.x = position.x;
     player.y = position.y;
@@ -93,6 +96,7 @@ export class MyRoom extends Room<MyRoomState> {
 
 function generateRandomPosition(
   playerEntities: MapSchema<Player>,
+  tiles: ArraySchema<Tile>,
   maxAttempts = 100,
 ) {
   let attempts = 0;
@@ -100,8 +104,14 @@ function generateRandomPosition(
   let position: { x: number; y: number };
   do {
     position = {
-      x: getRandomInt((WORLD_WIDTH / 2) - (MAX_BUBBLE_RADIUS / 2), (WORLD_WIDTH / 2) + (MAX_BUBBLE_RADIUS / 2)),
-      y: getRandomInt((WORLD_HEIGHT / 2) - (MAX_BUBBLE_RADIUS / 2), (WORLD_HEIGHT / 2) + (MAX_BUBBLE_RADIUS / 2)),
+      x: getRandomInt(
+        WORLD_WIDTH / 2 - MAX_BUBBLE_RADIUS / 2,
+        WORLD_WIDTH / 2 + MAX_BUBBLE_RADIUS / 2,
+      ),
+      y: getRandomInt(
+        WORLD_HEIGHT / 2 - MAX_BUBBLE_RADIUS / 2,
+        WORLD_HEIGHT / 2 + MAX_BUBBLE_RADIUS / 2,
+      ),
     };
     detectedCollision = false;
     playerEntities.forEach((player) => {
@@ -116,7 +126,24 @@ function generateRandomPosition(
       ) {
         detectedCollision = true;
       }
+      tiles.forEach((tile) => {
+        if (
+          CollideCircleTile(
+            {
+              x: position.x,
+              y: position.y,
+              radius: PLAYER_RADIUS,
+              velocityX: 0,
+              velocityY: 0,
+            },
+            tile,
+          )[0]
+        ) {
+          detectedCollision = true;
+        }
+      });
     });
+
     attempts++;
   } while (detectedCollision && attempts < maxAttempts);
   if (attempts === maxAttempts) {
@@ -128,7 +155,7 @@ function generateRandomPosition(
 }
 
 export function getRandomInt(min: number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}

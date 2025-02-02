@@ -45,6 +45,27 @@ export class Game extends Scene {
       startFrame: 0,
       endFrame: 4
     })
+
+    // Audio
+    this.load.audio("booster1", "booster1.mp3");
+    this.load.audio("booster2", "booster2.mp3");
+    for (let i = 1; i <= 3; i++) {
+      this.load.audio("choking" + i, "choking" + i + ".mp3");
+    }
+
+    for (let i = 1; i <= 3; i++) {
+      this.load.audio("collect" + i, "collect" + i + ".mp3");
+    }
+
+    for (let i = 1; i <= 7; i++) {
+      this.load.audio("death" + i, "death" + i + ".mp3");
+    }
+    for (let i = 1; i <= 8; i++) {
+      this.load.audio("grunt" + i, "grunt" + i + ".mp3");
+    }
+
+    this.load.audio("jetpack1", "Jetpack1.mp3");
+    this.load.audio("jetpack2", "jetpack2.mp3");
   }
 
   async create() {
@@ -108,6 +129,12 @@ export class Game extends Scene {
 
         if (CollideCircles(player, otherPlayer)) {
           ResolveCircleCollision(player, otherPlayer);
+          const i = Math.floor(Math.random() * 8) + 1;
+          if (player === this._clientPlayer || otherPlayer === this._clientPlayer) {
+            this.sound.play("grunt" + i, {
+              volume: 0.5
+            });
+          }
         }
       });
 
@@ -115,6 +142,13 @@ export class Game extends Scene {
         const [hit, n] = CollideCircleTile(player, tile);
         if (hit) {
           ResolveCircleTileCollision(player, tile, n);
+          const i = Math.floor(Math.random() * 8) + 1;
+          if (player === this._clientPlayer) {
+            this.sound.play("grunt" + i, {
+              volume: 0.5
+            });
+          }
+
           return;
         }
       })
@@ -221,6 +255,10 @@ export class Game extends Scene {
         this._collectibles[key].destroy();
         delete this._collectibles[key];
         this.shardEmitter.emitParticleAt(circle.x, circle.y, 8);
+        const i = Math.floor(Math.random() * 2) + 1;
+        this.sound.play("collect" + i, {
+          volume: 0.8
+        });
       }
     )
   }

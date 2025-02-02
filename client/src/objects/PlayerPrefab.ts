@@ -14,6 +14,8 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   private emitterCounter = 0;
   protected playerColor: Phaser.GameObjects.Rectangle;
 
+  protected jetPackSoundNo = 1;
+  protected startSuffocating: boolean = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -93,7 +95,6 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     if (state) {
       this.initializePlayer(state);
     }
-    // this.die();
 
   }
 
@@ -104,6 +105,12 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   }
 
   public die(): void {
+    if (this.scene) {
+      const i = Math.floor(Math.random() * 7) + 1;
+      this.scene.sound.play("death" + i, {
+        volume: 0.8
+      })
+    }
     this.destroy();
     this.blood.emitParticleAt(this.x, this.y, 16);
   }
@@ -158,7 +165,16 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     const oxyPct = (100 - this.oxygen)/ 100;
     this.setScale(1.0 + (oxyPct  / (2 + shake)));
     if (this.oxygen < 100 && this instanceof ClientPlayer) {
+      if (this.startSuffocating === false) {
+        const i = Math.floor(Math.random() * 3) + 1
+        this.scene.sound.play('choking' + i, {
+          volume: 0.5
+        });
+        this.startSuffocating = true;
+      }
       this.scene.cameras.main.shake(100, 0.0025 * oxyPct);
+    } else if (this.oxygen >= 100) {
+      this.startSuffocating = false;
     }
   }
 
@@ -171,13 +187,16 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     this.velocityY = Phaser.Math.Linear(this.velocityY, serverState.velocityY, 0.2);
     this.boost = serverState.boost;
     this.boostActive = serverState.boostEngaged;
-    this.oxygen = serverState.oxygen
+    this.oxygen = serverState.oxygen;
   }
 }
 
 export class ClientPlayer extends PlayerPrefab {
   private cameraPoint: { x: number, y: number }
   protected viewDirTarget: [number, number]
+  protected jetpackSound: Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound | Phaser.Sound.NoAudioSound;
+  protected boosterSound: Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound | Phaser.Sound.NoAudioSound;
+
 
   constructor(
     scene: Phaser.Scene,
@@ -199,6 +218,34 @@ export class ClientPlayer extends PlayerPrefab {
     };
     this.viewDir = [0, -1];
     this.viewDirTarget = [0, -1];
+    this.jetPackSoundNo = Math.random() > 0.5 ? 1 : 2;
+    this.jetpackSound = this.scene.sound.add("jetpack" + this.jetPackSoundNo, {
+      loop: true,
+      volume: 0.1
+    });
+    this.jetpackSound.play();
+
+    this.boosterSound = this.scene.sound.add("booster" + this.jetPackSoundNo, {
+      loop: true,
+      volume: 0.1
+    });
+
+
+    this.once('destroy', () => {
+      this.jetpackSound.destroy();
+      this.boosterSound.destroy();
+    })
+  }
+
+  public override update(time: number, dt: number) {
+    super.update(time, dt);
+    if (this.boostActive && this.jetpackSound.isPlaying) {
+      this.jetpackSound.pause();
+      this.boosterSound.play();
+    } else if (!this.boostActive && this.boosterSound.isPlaying) {
+      this.boosterSound.pause();
+      this.jetpackSound.play();
+    }
   }
 
   public handleInput(input: InputHandler) {

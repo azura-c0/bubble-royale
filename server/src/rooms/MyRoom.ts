@@ -1,6 +1,6 @@
 import { Room, Client } from "@colyseus/core";
 import { ArraySchema, MapSchema } from "@colyseus/schema";
-import { Player, MyRoomState, Tile } from "./schema/GameState";
+import { Player, MyRoomState, Tile, CircleEntity } from "./schema/GameState";
 import { HandleInput } from "./messages/HandleInput";
 import { InitializeGame } from "./messages/InitializeGame";
 import {
@@ -12,16 +12,30 @@ import {
 import { MovePlayer } from "../../../util/Player";
 import { IJoinOptions } from "../../../util/types";
 import {
+  BUBBLE_SHRINK_RATE,
+  BUBBLE_SPEED,
+  BUBBLE_STATE_CHANGE_INTERVAL,
   MAX_BUBBLE_RADIUS,
   PLAYER_RADIUS,
   WORLD_HEIGHT,
   WORLD_WIDTH,
 } from "../../../util/Constants";
 
+type BubbleDirection =
+  | "up"
+  | "down"
+  | "left"
+  | "right"
+  | "up-left"
+  | "up-right"
+  | "down-left"
+  | "down-right";
+
 export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
   elapsedTime: number = 0;
   readonly fixedTimeStep: number = 1000 / 60;
+  private _bubbleDirection: BubbleDirection = "up";
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -34,6 +48,36 @@ export class MyRoom extends Room<MyRoomState> {
       }
     });
 
+    this.clock.setInterval(() => {
+      const randomInt = getRandomInt(0, 7);
+      switch (randomInt) {
+        case 0:
+          this._bubbleDirection = "up";
+          break;
+        case 1:
+          this._bubbleDirection = "down";
+          break;
+        case 2:
+          this._bubbleDirection = "left";
+          break;
+        case 3:
+          this._bubbleDirection = "right";
+          break;
+        case 4:
+          this._bubbleDirection = "up-left";
+          break;
+        case 5:
+          this._bubbleDirection = "up-right";
+          break;
+        case 6:
+          this._bubbleDirection = "down-left";
+          break;
+        case 7:
+          this._bubbleDirection = "down-right";
+          break;
+      }
+    }, BUBBLE_STATE_CHANGE_INTERVAL);
+
     InitializeGame(this);
     this.onMessage("input", (client, message: InputMessage) => {
       const player = this.state.players.get(client.sessionId);
@@ -42,7 +86,10 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   fixedUpdate(delta: number) {
-    this.state.bubble.x++;
+    // Bubble logic
+    this.bubbleMovement(this.state.bubble);
+
+    // Handle Input
     this.state.players.forEach((player) => {
       let input: InputMessage;
 
@@ -91,6 +138,65 @@ export class MyRoom extends Room<MyRoomState> {
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
+  }
+
+  bubbleMovement(bubble: CircleEntity) {
+    switch (this._bubbleDirection) {
+      case "up":
+        if (bubble.y - bubble.radius <= 0) {
+          this._bubbleDirection = "down";
+        }
+        bubble.y -= BUBBLE_SPEED
+        break;
+      case "down":
+        if (bubble.y + bubble.radius >= WORLD_HEIGHT) {
+          this._bubbleDirection = "up";
+        }
+        bubble.y += BUBBLE_SPEED
+        break;
+      case "left":
+        if (bubble.x - bubble.radius <= 0) {
+          this._bubbleDirection = "right";
+        }
+        bubble.x -= BUBBLE_SPEED
+        break;
+      case "right":
+        if (bubble.x + bubble.radius >= WORLD_WIDTH) {
+          this._bubbleDirection = "left";
+        }
+        bubble.x += BUBBLE_SPEED
+        break;
+      case "up-left":
+        if (bubble.x - bubble.radius <= 0 || bubble.y - bubble.radius <= 0) {
+          this._bubbleDirection = "down-right";
+        }
+        bubble.x -= BUBBLE_SPEED
+        bubble.y -= BUBBLE_SPEED
+        break;
+      case "up-right":
+        if (bubble.x + bubble.radius >= WORLD_WIDTH || bubble.y - bubble.radius <= 0) {
+          this._bubbleDirection = "down-left";
+        }
+        bubble.x += BUBBLE_SPEED
+        bubble.y -= BUBBLE_SPEED
+        break;
+      case "down-left":
+        if (bubble.x - bubble.radius <= 0 || bubble.y + bubble.radius >= WORLD_HEIGHT) {
+          this._bubbleDirection = "up-right";
+        }
+        bubble.x -= BUBBLE_SPEED
+        bubble.y += BUBBLE_SPEED
+        break;
+      case "down-right":
+        if (bubble.x + bubble.radius >= WORLD_WIDTH || bubble.y + bubble.radius >= WORLD_HEIGHT) {
+          this._bubbleDirection = "up-left";
+        }
+        bubble.x += BUBBLE_SPEED
+        bubble.y += BUBBLE_SPEED
+        break;
+    }
+
+    bubble.radius *= BUBBLE_SHRINK_RATE;
   }
 }
 

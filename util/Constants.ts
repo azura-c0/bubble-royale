@@ -28,6 +28,9 @@ export const STRUCTURES: string[][] = [
 
 // BUBBLE SETTINGS
 export const MAX_BUBBLE_RADIUS = 800;
+export const BUBBLE_SHRINK_RATE = 0.9999;
+export const BUBBLE_SPEED = 1;
+export const BUBBLE_STATE_CHANGE_INTERVAL = 10000;
 
 // WORLD SETTINGS
 export const WORLD_WIDTH = 1024 * 3;

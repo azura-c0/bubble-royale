@@ -126,7 +126,9 @@ export function ResolveCircleCollision(a: MovingCircle, b: MovingCircle) {
 
   const relVel: EzVec = [a.velocityX - b.velocityX, a.velocityY - b.velocityY];
 
-  const reflected = Reflect(relVel, n);
+  const faster = Math.max(Vec2dLen([a.velocityX, a.velocityY]), Vec2dLen([b.velocityX, b.velocityY])) * 1.75;
+
+  const reflected = Vec2dScal(Vec2dNormal(Reflect(relVel, n) as EzVec), faster);
   a.velocityX = reflected[0];
   a.velocityY = reflected[1];
   b.velocityX = -reflected[0];

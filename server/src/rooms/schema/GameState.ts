@@ -1,5 +1,5 @@
 import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
-import { BOOST_MAX, PLAYER_RADIUS, MAX_BUBBLE_RADIUS, TILE_SIZE } from "../../../../util/Constants";
+import { BOOST_MAX, PLAYER_RADIUS, MAX_BUBBLE_RADIUS, TILE_SIZE, WORLD_WIDTH, WORLD_HEIGHT } from "../../../../util/Constants";
 
 export class CircleEntity extends Schema {
   @type("number") x: number = 0;
@@ -50,7 +50,7 @@ export class Tile extends Schema {
 
 export class MyRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
-  @type(CircleEntity) bubble = new CircleEntity(0, 0, MAX_BUBBLE_RADIUS);
+  @type(CircleEntity) bubble = new CircleEntity(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, MAX_BUBBLE_RADIUS);
   @type([Tile]) tiles = new ArraySchema<Tile>();
   @type([CircleEntity]) collectible = new ArraySchema<CircleEntity>();
 }

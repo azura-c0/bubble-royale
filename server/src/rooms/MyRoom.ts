@@ -1,4 +1,5 @@
 import { Room, Client } from "@colyseus/core";
+import { MapSchema } from "@colyseus/schema";
 import { Player, MyRoomState } from "./schema/GameState";
 import { HandleInput } from "./messages/HandleInput";
 import { InitializeGame } from "./messages/InitializeGame";
@@ -10,6 +11,11 @@ import {
 } from "../../../util/Collision";
 import { MovePlayer } from "../../../util/Player";
 import { IJoinOptions } from "../../../util/types";
+import {
+  PLAYER_RADIUS,
+  WORLD_HEIGHT,
+  WORLD_WIDTH,
+} from "../../../util/Constants";
 
 export class MyRoom extends Room<MyRoomState> {
   maxClients: number = 20;
@@ -67,8 +73,8 @@ export class MyRoom extends Room<MyRoomState> {
   onJoin(client: Client, options: IJoinOptions) {
     this.state.players.set(client.sessionId, new Player(options.name));
 
-    this.state.players.get(client.sessionId).x = Math.random() * 800;
-    this.state.players.get(client.sessionId).y = Math.random() * 600;
+    this.state.players.get(client.sessionId).x = WORLD_WIDTH / 2;
+    this.state.players.get(client.sessionId).y = WORLD_HEIGHT / 2;
     console.log(client.sessionId, "joined!");
   }
 
@@ -79,4 +85,40 @@ export class MyRoom extends Room<MyRoomState> {
   onDispose() {
     console.log("room", this.roomId, "disposing...");
   }
+}
+
+function generateRandomPosition(
+  playerEntities: MapSchema<Player>,
+  maxAttempts = 100,
+) {
+  let attempts = 0;
+  let detectedCollision = false;
+  let position: { x: number; y: number };
+  do {
+    position = {
+      x: Math.random() * WORLD_WIDTH,
+      y: Math.random() * WORLD_HEIGHT,
+    };
+    detectedCollision = false;
+    playerEntities.forEach((player) => {
+      if (
+        CollideCircles(player, {
+          x: position.x,
+          y: position.y,
+          radius: PLAYER_RADIUS,
+          velocityX: 0,
+          velocityY: 0,
+        })
+      ) {
+        detectedCollision = true;
+      }
+    });
+    attempts++;
+  } while (detectedCollision && attempts < maxAttempts);
+  if (attempts === maxAttempts) {
+    throw new Error(
+      "Unable to generate a non-colliding position after maximum attempts",
+    );
+  }
+  return position;
 }

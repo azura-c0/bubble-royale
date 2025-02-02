@@ -9,6 +9,8 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   protected arc: Phaser.GameObjects.Arc;
   protected text: Phaser.GameObjects.Text;
   protected jetpack: Phaser.GameObjects.Particles.ParticleEmitter;
+  private emitterCounter = 0;
+  protected playerColor: Phaser.GameObjects.Rectangle;
 
   constructor(
     scene: Phaser.Scene,
@@ -39,12 +41,19 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
       }
     });
     this.text.x = this.x - this.text.width / 2;
-    this.text.setDepth(1);
-    this.jetpack = this.scene.add.particles(this.x, this.y, "smoke", {
+    this.text.setDepth(3);
+    this.playerColor = this.scene.add.rectangle(this.x, this.y, 22, 8, this.color);
+    this.playerColor.setDepth(1);
+    this.playerColor.setOrigin(0.5, -1.75);
+    this.setDepth(2);
+    this.jetpack = this.scene.add.particles(0, 0, "smoke", {
       lifespan: 1000,
       emitting: false,
-      frequency: 10
+      frequency: 100000,
+      scale: { start: 1.0, end: 0 },
+      rotate: { start: 0, end: 180}
     });
+    this.jetpack.setDepth(2.5);
     this.radius = PLAYER_RADIUS;
     if (state) {
       this.initializePlayer(state);
@@ -65,10 +74,23 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
       this.text.y = this.y - PLAYER_RADIUS - this.text.height - 5;
     }
 
-    const speed = Vec2dLen([this.velocityX, this.velocityY]);
-      this.jetpack.emitParticleAt(this.x, this.y, 1);
+    if (this.emitterCounter-- <= 0) {
+      const emitAt1 = [
+        this.x + Math.cos(this.rotation + Math.PI/2.2) * 40,
+        this.y + Math.sin(this.rotation + Math.PI/2.2) * 40,
+      ];
+      const emitAt2 = [
+        this.x + Math.cos(this.rotation + Math.PI/1.8) * 40,
+        this.y + Math.sin(this.rotation + Math.PI/1.8) * 40,
+      ];
+      this.jetpack.emitParticleAt(emitAt1[0], emitAt1[1], 1);
+      this.jetpack.emitParticleAt(emitAt2[0], emitAt2[1], 1);
+      this.emitterCounter = 8;
+    }
 
     this.sync();
+    this.playerColor.x = this.x;
+    this.playerColor.y = this.y;
   }
 
   protected sync() {
@@ -123,6 +145,7 @@ export class ClientPlayer extends PlayerPrefab {
     this.viewDirTarget = Vec2dNormal(this.viewDirTarget);
     const viewDirTargetAngle = Math.atan2(this.viewDirTarget[0], -this.viewDirTarget[1]);
     this.rotation = Phaser.Math.Linear(this.rotation, viewDirTargetAngle, 0.2);
+    this.playerColor.rotation = this.rotation;
   }
 
   protected override sync() {

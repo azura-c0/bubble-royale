@@ -6,7 +6,7 @@ import { Player } from "../schema/Player";
 import { CollideCircles, CollideCircleTile, ResolveCircleCollision, ResolveCircleTileCollision } from "../../../util/Collision";
 import { Tile } from "../schema/Tile";
 import { MovePlayer } from "../../../util/Player";
-import { MAX_BUBBLE_RADIUS } from "../../../util/Constants";
+import { MAX_BUBBLE_RADIUS, WORLD_HEIGHT, WORLD_WIDTH } from "../../../util/Constants";
 
 const FIXED_TIMESTEP = 1000 / 60;
 export class Game extends Scene {
@@ -19,7 +19,7 @@ export class Game extends Scene {
     string,
     PlayerPrefab
     >();
-  
+  private miniMap: Phaser.Cameras.Scene2D.Camera;
   private _bubble: Phaser.GameObjects.Arc;
 
   constructor() {
@@ -31,6 +31,7 @@ export class Game extends Scene {
     this.load.image("astronaut", "astronaut.png")
     this.load.image("tile", "tile.png")
     this.load.image("smoke", "smoke.png");
+    this.load.image("arrow", "arrow.png")
   }
 
   async create() {
@@ -45,18 +46,22 @@ export class Game extends Scene {
       right: ["D", Phaser.Input.Keyboard.KeyCodes.RIGHT],
       action: [Phaser.Input.Keyboard.KeyCodes.SPACE],
     });
-    const bg = this.add.tileSprite(0, 0, 1024 * 4, 768 * 4, "background");
+    const bg = this.add.tileSprite(0, 0, WORLD_WIDTH * 2, WORLD_HEIGHT * 2, "background");
+    this.miniMap = this.cameras.add(16, 16, 200, 200).setZoom(0.1).setName('mini');
+    this.miniMap.ignore(bg);
+    this.miniMap.backgroundColor = Phaser.Display.Color.HexStringToColor("#111");
     //bg.setScale(3, 3);
     this._inputHandler.startListening();
     this.initializePlayerEntities();
     this.initalizeTiles();
     this._bubble = this.add.arc(0, 0, MAX_BUBBLE_RADIUS, 0, 360, false, 0x0000ff, 0.2);
+    this.miniMap.centerOn(this._bubble.x, this._bubble.y);
+
     this.initializeBubble();
   }
 
   fixedTick(delta: number) {
     this._clientPlayer.handleInput(this._inputHandler);
-    this._clientPlayer?.updateCamera(this.cameras.main);
     this._playerEntities.forEach((player) => {
       this._playerEntities.forEach((otherPlayer) => {
         if (otherPlayer === player) return;
@@ -101,10 +106,15 @@ export class Game extends Scene {
   }
 
   private initializeBubble() {
-    NetworkManager.getInstance().room.state.listen("bubble", (bubble) => {
-      this._bubble.x = bubble.x;
-      this._bubble.y = bubble.y;
-      this._bubble.radius = bubble.radius;
+    NetworkManager.getInstance().room.state.bubble.onChange(() => {
+      this._bubble.x = NetworkManager.getInstance().room.state.bubble.x;
+      this._bubble.y =  NetworkManager.getInstance().room.state.bubble.y;
+      this._bubble.radius =  NetworkManager.getInstance().room.state.bubble.radius;
+      this.miniMap.centerOn(this._bubble.x, this._bubble.y);
+
+      const diff = Math.atan2(this._bubble.y - this._clientPlayer.y, this._bubble.x - this._clientPlayer.x);
+
+      this.events.emit('arrow', diff + Math.PI/2);
     });
   }
 
@@ -113,8 +123,7 @@ export class Game extends Scene {
       (player: Player, sessionId: string) => {
         // Initialize client player
         if (sessionId === NetworkManager.getInstance().room.sessionId) {
-          console.log("Player added", player);
-
+          
           this._playerEntities.set(
             sessionId,
             this._clientPlayer = new ClientPlayer(
@@ -122,12 +131,17 @@ export class Game extends Scene {
               player.x,
               player.y,
               player.velocityX, player.velocityY,
-              0xff0000,
+              0x0000ff,
               player.name,
               player,
             )
           );
-
+          this.cameras.main.startFollow(this._clientPlayer, false, 0.2, 0.2, 0, 0);
+          this.cameras.main.zoom = 2;
+          this.cameras.main.deadzone = new Phaser.Geom.Rectangle(
+            0, 0, 50, 50
+          );
+          this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
           //new PlayerServerReference(this._clientPlayer, player);
         } else {
           //Initialize other player entities

@@ -1,5 +1,5 @@
 export const PLAYER_FRICTION = 0.9997;
-export const PLAYER_ACCELERATION = 0.0015;
+export const PLAYER_ACCELERATION = 0.008;
 export const PLAYER_RADIUS = 14;
 export const PLAYER_MAX_VELOCITY = 0.15;
 

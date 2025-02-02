@@ -41,6 +41,7 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   fixedUpdate(delta: number) {
+    this.state.bubble.x++;
     this.state.players.forEach((player) => {
       let input: InputMessage;
 

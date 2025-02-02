@@ -7,7 +7,7 @@ export const PLAYER_OXYGEN_RATE = 1;
 
 // PLAYER BOOST SETTINGS
 export const BOOST_FRICTION = 0.9997;
-export const BOOST_ACCELERATION = 0.005;
+export const BOOST_ACCELERATION = 0.009;
 export const BOOST_MAX_VELOCITY = 0.3;
 export const BOOST_MAX = 300;
 export const BOOST_INCREASE = 50;
@@ -16,16 +16,38 @@ export const BOOST_INCREASE = 50;
 export const TILE_SIZE = 32;
 export const STRUCTURE_QTY = 30;
 export const STRUCTURES: string[][] = [
-  ["aa  a",
+  ["aa   aa",
+   "ax    a",
+   "a     a",
+   "a   x a",
+   "ax    a",
+   "aa   aa"],
+
+  ["aaa aaa",
+   "ax    a",
+   "a     a",
+   "a   x a",
+   "a     a",
+   "aa   aa"],
+
+  ["ax  a",
    "a   a",
-   "a   a",
-   "ax  a",
-   "a   a",
-   "aa  a"],
+   "aaa a"],
+
+
+  [" a ",
+   "aaa",
+   " a "],
 
   ["a  a",
    "a  a",
    "ax a"],
+
+  ["a aaa",
+   "axxxa",
+   "aaa a"],
+
+  ["x"]
 ]
 
 // BUBBLE SETTINGS

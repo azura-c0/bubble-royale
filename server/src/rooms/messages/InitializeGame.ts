@@ -17,23 +17,17 @@ export const InitializeGame = (room: MyRoom) => {
 
   for (let i = 0; i < WORLD_WIDTH; i += TILE_SIZE) {
     room.state.tiles.push(new Tile(i, 0));
-    room.state.tiles.push(
-      new Tile(
-        i,
-        WORLD_HEIGHT - TILE_SIZE,
-      ),
-    );
+    room.state.tiles.push(new Tile(i, WORLD_HEIGHT - TILE_SIZE));
   }
 
   for (let i = 0; i < WORLD_HEIGHT; i += TILE_SIZE) {
     room.state.tiles.push(new Tile(0, i));
-    room.state.tiles.push(
-      new Tile(WORLD_WIDTH - TILE_SIZE, i)
-    );
+    room.state.tiles.push(new Tile(WORLD_WIDTH - TILE_SIZE, i));
   }
 
   for (let i = 0; i < STRUCTURE_QTY; i++) {
-    const shape: string[] = Math.random() > 0.5 ? STRUCTURES[0] : STRUCTURES[1];
+    const shape: string[] = STRUCTURES[getRandomInt(0, STRUCTURES.length - 1)];
+    console.log(shape);
     const position = generateRandomPosition(entities, {
       width: shape[0].length * TILE_SIZE,
       height: shape.length * TILE_SIZE,

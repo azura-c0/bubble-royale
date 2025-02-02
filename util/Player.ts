@@ -1,4 +1,3 @@
-import type { PlayerPrefab } from "../client/src/objects/PlayerPrefab";
 import { ClampLength, Vec2dLen } from "./Collision";
 import { BOOST_FRICTION, BOOST_MAX_VELOCITY, PLAYER_FRICTION, PLAYER_MAX_VELOCITY } from "./Constants";
 

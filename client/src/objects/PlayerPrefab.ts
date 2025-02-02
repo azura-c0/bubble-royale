@@ -106,7 +106,6 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public die(): void {
     this.destroy();
     this.blood.emitParticleAt(this.x, this.y, 16);
-
   }
 
   public draw() {
@@ -114,6 +113,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
       const angle = Vec2dNormal([this.velocityX, this.velocityY]);
       const viewDirTargetAngle = Math.atan2(angle[0], -angle[1]);
       this.rotation = lerpAngle(this.rotation, viewDirTargetAngle, 0.9);
+      this.playerColor.rotation = this.rotation;
     }
   }
 

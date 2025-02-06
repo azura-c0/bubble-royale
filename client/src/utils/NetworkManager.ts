@@ -6,7 +6,7 @@ export class NetworkManager {
   private _client: Colyseus.Client;
   private static _instance: NetworkManager;
 
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): NetworkManager {
     if (this._instance == null) {
@@ -21,15 +21,37 @@ export class NetworkManager {
 
   public async connectToRoom(
     name: string,
-    color: string
-  ): Promise<Colyseus.Room<MyRoomState>> {
+    color: string,
+    action: "host" | "join" | "find",
+    roomId?: string,
+  ): Promise<Colyseus.Room<MyRoomState> | unknown> {
     try {
-      this.room = await this._client.joinOrCreate("my_room", { name, color });
+      switch (action) {
+        case "host":
+          this.room = await this._client.create("my_room", {
+            name,
+            color,
+          });
+          break;
+        case "find":
+          this.room = await this._client.joinOrCreate("my_room", {
+            name,
+            color,
+          });
+          break;
+        case "join":
+          if (!roomId) {
+            throw new Error("Room ID is required for find action");
+          }
+          this.room = await this._client.joinById(roomId, {
+            name,
+            color,
+          });
+          break;
+      }
       return this.room;
     } catch (e) {
-      console.error(e);
-      console.log(this._client);
-      throw e;
+      return e;
     }
   }
 

@@ -44,6 +44,7 @@ export class MyRoom extends Room<MyRoomState> {
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
+    this.onMessage("amIHost", (client) => client.send("host", this._hostClient === client));
     this.onMessage("start", (client) => {
       if (client === this._hostClient) {
         this.start();
@@ -190,13 +191,13 @@ export class MyRoom extends Room<MyRoomState> {
 
     if (this.clients.length === 1) {
       this._hostClient = client;
-      this._hostClient.send("host", true);
     }
 
     const position = generateRandomPosition(
       this.state.players,
       this.state.tiles,
     );
+
     const player = this.state.players.get(client.sessionId);
     player.x = position.x;
     player.y = position.y;

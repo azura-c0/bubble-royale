@@ -1,6 +1,6 @@
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../util/Constants";
-import { NetworkManager } from "../utils/NetworkManager";
-import { IPlayerData } from "../../../util/types";
+import { Room } from "colyseus.js";
+import { MyRoomState } from "../schema/MyRoomState";
 
 export class Lobby extends Phaser.Scene {
   private _nameListOffset: number = 0;
@@ -17,17 +17,13 @@ export class Lobby extends Phaser.Scene {
     this.load.image("rockbg", "rockbg.png");
   }
 
-  async create(data: IPlayerData) {
+  async create(room: Room<MyRoomState>) {
     const bg = this.add.image(0, 0, "rockbg");
     bg.setOrigin(0, 0);
     bg.setScale(1.5);
 
-    const nm = NetworkManager.getInstance();
 
-    nm.initialize();
-    await nm.connectToRoom(data.name, data.color);
-
-    nm.room.state.listen("gameStarted", (started) => {
+    room.state.listen("gameStarted", (started) => {
       if (started) {
         this.scene.start("Game");
         this.scene.launch("UIScene");
@@ -41,7 +37,7 @@ export class Lobby extends Phaser.Scene {
       fontFamily: "ProggyClean",
     });
 
-    nm.room.state.players.onAdd((player, sessionId) => {
+    room.state.players.onAdd((player, sessionId) => {
       this._nameListOffset += 25;
       const playerText = this.add.text(
         20,
@@ -57,7 +53,7 @@ export class Lobby extends Phaser.Scene {
       this._playerList.set(sessionId, playerText);
     });
 
-    nm.room.state.players.onRemove((_player, sessionId) => {
+    room.state.players.onRemove((_player, sessionId) => {
       this._nameListOffset -= 25;
       this._playerList.get(sessionId)?.destroy();
       this._playerList.forEach((text) => {
@@ -65,12 +61,12 @@ export class Lobby extends Phaser.Scene {
       });
     });
 
-    nm.room.onMessage("host", (isHost) => {
+    room.onMessage("host", (isHost) => {
       this._isHost = isHost;
       if (this._isHost) {
         this.add.text(
           SCREEN_WIDTH / 2 - 385,
-          SCREEN_HEIGHT - 100,
+          SCREEN_HEIGHT - 150,
           "You are the host, press start when all players have joined",
           {
             color: "white",
@@ -80,7 +76,7 @@ export class Lobby extends Phaser.Scene {
           },
         );
         const button = this.add
-          .sprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 35, "startbutton", 0)
+          .sprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 65, "startbutton", 0)
           .setScale(2)
           .setInteractive()
           .on("pointerdown", () => {
@@ -88,13 +84,15 @@ export class Lobby extends Phaser.Scene {
           })
           .on("pointerup", () => {
             button.setFrame(0);
-            nm.room.send("start");
+            room.send("start");
           })
           .on("click", () => {
-            nm.room.send("start");
+            room.send("start");
           });
       }
     });
+
+    room.send("amIHost"); // Ask the server if we are the host
 
     this._waitingText = this.add.text(
       SCREEN_WIDTH / 2,

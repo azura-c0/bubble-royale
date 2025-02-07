@@ -42,9 +42,18 @@ export class MyRoom extends Room<MyRoomState> {
   private _hostClient: Client;
   private _bubbleDirection: BubbleDirection = "up";
 
-  onCreate(options: any) {
+  onCreate() {
     this.setState(new MyRoomState());
-    this.onMessage("amIHost", (client) => client.send("host", this._hostClient === client));
+    this.onMessage("amIHost", (client) =>
+      client.send("host", this._hostClient === client),
+    );
+
+    this.onMessage<string>("message", (client, message) => {
+      const name = this.state.players.get(client.sessionId).name;
+      console.log(`${name}: ${message}`);
+      this.state.messages.push(`${name}: ${message}`);
+    });
+
     this.onMessage("start", (client) => {
       if (client === this._hostClient) {
         this.start();

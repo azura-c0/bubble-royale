@@ -1,6 +1,7 @@
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../util/Constants";
 import { Room } from "colyseus.js";
 import { MyRoomState } from "../schema/MyRoomState";
+import { inputStyle, messageStyle } from "../components/styles";
 
 export class Lobby extends Phaser.Scene {
   private _nameListOffset: number = 0;
@@ -36,12 +37,14 @@ export class Lobby extends Phaser.Scene {
       fontFamily: "ProggyClean",
     });
 
-    const playerCount = this.add.text(SCREEN_WIDTH / 2, 60, `${this._playerList.size}/30`, {
-      color: "white",
-      fontSize: "52px",
-      fontStyle: "bold",
-      fontFamily: "ProggyClean",
-    }).setOrigin(0.5, 0);
+    const playerCount = this.add
+      .text(SCREEN_WIDTH / 2, 60, `${this._playerList.size}/20`, {
+        color: "white",
+        fontSize: "52px",
+        fontStyle: "bold",
+        fontFamily: "ProggyClean",
+      })
+      .setOrigin(0.5, 0);
 
     this.add
       .text(
@@ -73,7 +76,35 @@ ${room.id}
         },
       );
       this._playerList.set(sessionId, playerText);
-      playerCount.setText(`${this._playerList.size}/30`);
+      playerCount.setText(`${this._playerList.size}/20`);
+    });
+
+    // Chat
+    this.add.dom(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT - 400).createFromHTML(`
+      <div style="display: flex; flex-direction: column-reverse; border: 5px solid black; border-radius: 35px; background-color: rgba(0, 0, 0, 0.5); padding: 12px; padding-bottom: 6%;">
+        <div id="messages" style="width: 675px; height: 375px; overflow-y: scroll; scrollbar-color: #0d0d0f #28282B; border-radius: 10px; font-size: 24px"></div>
+        <input type="text" id="chatInput" style="${inputStyle} display: flex; border-radius: 15px; position: absolute; top: 87%; left: 2%; width: 88%; font-size: 24px"/>
+      </div>
+          `);
+
+    room.state.messages.onAdd((text) => {
+      this._nameListOffset += 25;
+      const messageElement = document.createElement("p");
+      messageElement.innerText = text;
+      messageElement.style.fontFamily = "ProggyClean";
+      messageElement.style.fontWeight = "bold";
+      const messages = document.getElementById("messages");
+      if (!messages) return;
+      messages.appendChild(messageElement);
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    const chatInput = document.getElementById("chatInput") as HTMLInputElement;
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        room.send("message", chatInput.value);
+        chatInput.value = "";
+      }
     });
 
     room.state.players.onRemove((_player, sessionId) => {

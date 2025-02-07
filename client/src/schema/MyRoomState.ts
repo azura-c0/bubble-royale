@@ -12,6 +12,7 @@ import { Tile } from './Tile'
 
 export class MyRoomState extends Schema {
     @type({ map: Player }) public players: MapSchema<Player> = new MapSchema<Player>();
+    @type([ "string" ]) public messages: ArraySchema<string> = new ArraySchema<string>();
     @type(CircleEntity) public bubble: CircleEntity = new CircleEntity();
     @type([ Tile ]) public tiles: ArraySchema<Tile> = new ArraySchema<Tile>();
     @type([ CircleEntity ]) public collectible: ArraySchema<CircleEntity> = new ArraySchema<CircleEntity>();

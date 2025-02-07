@@ -52,6 +52,7 @@ export class Tile extends Schema {
 
 export class MyRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
+  @type(["string"]) messages = new ArraySchema<string>();
   @type(CircleEntity) bubble = new CircleEntity(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, MAX_BUBBLE_RADIUS);
   @type([Tile]) tiles = new ArraySchema<Tile>();
   @type([CircleEntity]) collectible = new ArraySchema<CircleEntity>();

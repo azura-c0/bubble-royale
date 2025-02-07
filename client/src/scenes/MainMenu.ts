@@ -1,6 +1,7 @@
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../util/Constants";
 import { NetworkManager } from "../utils/NetworkManager";
 import { Button } from "../components/button";
+import { inputStyle } from "../components/styles";
 
 export class MainMenu extends Phaser.Scene {
   constructor() {
@@ -30,15 +31,6 @@ export class MainMenu extends Phaser.Scene {
       align-items: center;
       gap: 30px;
       `;
-
-    const inputStyle = `
-      padding: 5px;
-      font-size: 32px;
-      font-weight: bold;
-      color: #ffffff;
-      background-color: #28282B;
-      font-family: 'ProggyClean';
-    `;
 
     const colorStyle = `
       box-sizing: border-box;

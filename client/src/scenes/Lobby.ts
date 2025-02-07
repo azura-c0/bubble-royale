@@ -22,7 +22,6 @@ export class Lobby extends Phaser.Scene {
     bg.setOrigin(0, 0);
     bg.setScale(1.5);
 
-
     room.state.listen("gameStarted", (started) => {
       if (started) {
         this.scene.start("Game");
@@ -36,6 +35,29 @@ export class Lobby extends Phaser.Scene {
       fontStyle: "bold",
       fontFamily: "ProggyClean",
     });
+
+    const playerCount = this.add.text(SCREEN_WIDTH / 2, 60, `${this._playerList.size}/30`, {
+      color: "white",
+      fontSize: "52px",
+      fontStyle: "bold",
+      fontFamily: "ProggyClean",
+    }).setOrigin(0.5, 0);
+
+    this.add
+      .text(
+        SCREEN_WIDTH - 110,
+        50,
+        `Room code
+${room.id}
+      `,
+        {
+          color: "white",
+          fontSize: "42px",
+          fontStyle: "bold",
+          fontFamily: "ProggyClean",
+        },
+      )
+      .setOrigin(0.5, 0);
 
     room.state.players.onAdd((player, sessionId) => {
       this._nameListOffset += 25;
@@ -51,14 +73,17 @@ export class Lobby extends Phaser.Scene {
         },
       );
       this._playerList.set(sessionId, playerText);
+      playerCount.setText(`${this._playerList.size}/30`);
     });
 
     room.state.players.onRemove((_player, sessionId) => {
+      if (!this._playerList.has(sessionId)) return;
+
       this._nameListOffset -= 25;
-      this._playerList.get(sessionId)?.destroy();
       this._playerList.forEach((text) => {
-        text.y -= 25;
+        if (text.y > this._playerList.get(sessionId)!.y) text.y -= 25;
       });
+      this._playerList.get(sessionId)?.destroy();
     });
 
     room.onMessage("host", (isHost) => {
@@ -94,17 +119,19 @@ export class Lobby extends Phaser.Scene {
 
     room.send("amIHost"); // Ask the server if we are the host
 
-    this._waitingText = this.add.text(
-      SCREEN_WIDTH / 2,
-      SCREEN_HEIGHT - 100,
-      "Waiting for host to start the game...",
-      {
-        color: "white",
-        fontSize: "32px",
-        fontStyle: "bold",
-        fontFamily: "ProggyClean",
-      },
-    ).setOrigin(0.5, 0.5);
+    this._waitingText = this.add
+      .text(
+        SCREEN_WIDTH / 2,
+        SCREEN_HEIGHT - 100,
+        "Waiting for host to start the game...",
+        {
+          color: "white",
+          fontSize: "32px",
+          fontStyle: "bold",
+          fontFamily: "ProggyClean",
+        },
+      )
+      .setOrigin(0.5, 0.5);
   }
 
   update() {

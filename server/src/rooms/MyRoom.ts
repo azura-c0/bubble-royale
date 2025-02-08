@@ -49,12 +49,13 @@ export class MyRoom extends Room<MyRoomState> {
     );
 
     this.onMessage<string>("message", (client, message) => {
+      if (message === "") return;
       const name = this.state.players.get(client.sessionId).name;
       console.log(`${name}: ${message}`);
       this.state.messages.push(`${name}: ${message}`);
     });
 
-    this.onMessage("start", (client) => {
+    this.onMessage<void>("start", (client) => {
       if (client === this._hostClient) {
         this.start();
         this.state.gameStarted = true;
@@ -63,7 +64,9 @@ export class MyRoom extends Room<MyRoomState> {
     });
   }
 
+  // called at game start
   start() {
+    this.state.messages.clear();
     this.setSimulationInterval((deltaTime) => {
       this.elapsedTime += deltaTime;
 
@@ -112,6 +115,7 @@ export class MyRoom extends Room<MyRoomState> {
     });
   }
 
+  // called every fixedTimeStep 
   fixedUpdate(delta: number) {
     // Bubble logic
     this.bubbleMovement(this.state.bubble);

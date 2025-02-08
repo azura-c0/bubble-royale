@@ -81,15 +81,14 @@ ${room.id}
 
     // Chat
     this.add.dom(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT - 400).createFromHTML(`
-      <div style="display: flex; flex-direction: column-reverse; border: 5px solid black; border-radius: 35px; background-color: rgba(0, 0, 0, 0.5); padding: 12px; padding-bottom: 6%;">
-        <div id="messages" style="width: 675px; height: 375px; overflow-y: scroll; scrollbar-color: #0d0d0f #28282B; border-radius: 10px; font-size: 24px"></div>
+      <div style="display: flex; flex-direction: column-reverse; border: 5px solid black; border-radius: 35px; background-color: rgba(0, 0, 0, 0.5); padding: 12px; padding-bottom: 10%;">
+        <div id="messages" style="display: flex; flex-direction: column; justify-content: start; align-items: start;  width: 675px; height: 375px; overflow-y: scroll; scrollbar-color: #0d0d0f #28282B; font-size: 28px;"></div>
         <input type="text" id="chatInput" style="${inputStyle} display: flex; border-radius: 15px; position: absolute; top: 87%; left: 2%; width: 88%; font-size: 24px"/>
       </div>
           `);
 
     room.state.messages.onAdd((text) => {
-      this._nameListOffset += 25;
-      const messageElement = document.createElement("p");
+      const messageElement = document.createElement("div");
       messageElement.innerText = text;
       messageElement.style.fontFamily = "ProggyClean";
       messageElement.style.fontWeight = "bold";

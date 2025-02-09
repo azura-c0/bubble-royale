@@ -1,6 +1,12 @@
 import { Room, Client } from "@colyseus/core";
 import { ArraySchema, MapSchema } from "@colyseus/schema";
-import { Player, MyRoomState, Tile, CircleEntity } from "./schema/GameState";
+import {
+  Player,
+  MyRoomState,
+  Tile,
+  CircleEntity,
+  TextMessage,
+} from "./schema/GameState";
 import { HandleInput } from "./messages/HandleInput";
 import { InitializeGame } from "./messages/InitializeGame";
 import {
@@ -50,9 +56,11 @@ export class MyRoom extends Room<MyRoomState> {
 
     this.onMessage<string>("message", (client, message) => {
       if (message === "") return;
-      const name = this.state.players.get(client.sessionId).name;
-      console.log(`${name}: ${message}`);
-      this.state.messages.push(`${name}: ${message}`);
+      const player = this.state.players.get(client.sessionId);
+      console.log(`${player.name}: ${message}`);
+      this.state.messages.push(
+        new TextMessage(player.name, player.color, message),
+      );
     });
 
     this.onMessage<void>("start", (client) => {
@@ -107,6 +115,8 @@ export class MyRoom extends Room<MyRoomState> {
     }, BUBBLE_STATE_CHANGE_INTERVAL);
 
     InitializeGame(this);
+
+    // gameplay messages
     this.onMessage("input", (client, message: InputMessage) => {
       const player = this.state.players.get(client.sessionId);
       if (player) {
@@ -115,7 +125,7 @@ export class MyRoom extends Room<MyRoomState> {
     });
   }
 
-  // called every fixedTimeStep 
+  // called every fixedTimeStep
   fixedUpdate(delta: number) {
     // Bubble logic
     this.bubbleMovement(this.state.bubble);
@@ -175,8 +185,11 @@ export class MyRoom extends Room<MyRoomState> {
       )
     ) {
       player.oxygen -= PLAYER_OXYGEN_RATE;
-      if (player.oxygen <= 0) {
-        this.state.players.delete(session);
+      if (player.oxygen <= 0 && player.alive) {
+        player.alive = false;
+        if (!this._winner) {
+          this.checkWinCondition();
+        }
       }
     } else {
       player.oxygen += PLAYER_OXYGEN_RATE * 1.5;
@@ -184,15 +197,18 @@ export class MyRoom extends Room<MyRoomState> {
         player.oxygen = 100;
       }
     }
-    if (!this._winner) {
-      this.checkWinCondition();
-    }
   }
 
   private checkWinCondition() {
-    if (this.state.players.size === 1) {
-      this._winner = this.state.players.values().next().value.name;
-      this.broadcast("win", this._winner);
+    const alivePlayers: Player[] = [];
+    this.state.players.forEach((player) => {
+      if (player.alive) {
+        alivePlayers.push(player);
+      }
+    });
+
+    if (alivePlayers.length === 1) {
+      this.broadcast("win", alivePlayers[0].name);
     }
   }
 

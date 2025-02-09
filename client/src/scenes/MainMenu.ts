@@ -74,7 +74,7 @@ export class MainMenu extends Phaser.Scene {
       </style>
       <div id="join-game-div">
       <p id="error-message" style="color: red; font-size: 32px; font-weight: bold; font-family: 'ProggyClean'; position: absolute; top: 2px;"></p>
-      <input type="text" id="room-id" placeholder="Enter Game ID" required>
+      <input type="text" id="room-id" placeholder="Enter Room Code" required>
       </div>
     `,
       )
@@ -155,7 +155,7 @@ export class MainMenu extends Phaser.Scene {
     username.style.border = "2px solid white";
     console.log(roomId.value);
 
-    const nm = NetworkManager.getInstance();
+    const nm = NetworkManager.instance;
 
     nm.initialize();
     const room = await nm.connectToRoom(username.value, color.value, action, roomId.value);

@@ -8,10 +8,11 @@ export class NetworkManager {
 
   private constructor() {}
 
-  public static getInstance(): NetworkManager {
+  static get instance() {
     if (this._instance == null) {
       this._instance = new NetworkManager();
     }
+
     return this._instance;
   }
 

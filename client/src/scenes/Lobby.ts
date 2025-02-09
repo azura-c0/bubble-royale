@@ -1,7 +1,7 @@
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../util/Constants";
 import { Room } from "colyseus.js";
 import { MyRoomState } from "../schema/MyRoomState";
-import { inputStyle, messageStyle } from "../components/styles";
+import { inputStyle } from "../components/styles";
 
 export class Lobby extends Phaser.Scene {
   private _nameListOffset: number = 0;
@@ -80,20 +80,32 @@ ${room.id}
     });
 
     // Chat
-    this.add.dom(SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT - 400).createFromHTML(`
-      <div style="display: flex; flex-direction: column-reverse; border: 5px solid black; border-radius: 35px; background-color: rgba(0, 0, 0, 0.5); padding: 12px; padding-bottom: 10%;">
+    this.add.dom(SCREEN_WIDTH / 2 + 130, SCREEN_HEIGHT - 400).createFromHTML(`
+      <div style="display: flex; flex-direction: column; border: 5px solid black; border-radius: 35px; background-color: rgba(0, 0, 0, 0.5); padding: 12px; padding-bottom: 10%;">
         <div id="messages" style="display: flex; flex-direction: column; justify-content: start; align-items: start;  width: 675px; height: 375px; overflow-y: scroll; scrollbar-color: #0d0d0f #28282B; font-size: 28px;"></div>
         <input type="text" id="chatInput" style="${inputStyle} display: flex; border-radius: 15px; position: absolute; top: 87%; left: 2%; width: 88%; font-size: 24px"/>
       </div>
           `);
 
-    room.state.messages.onAdd((text) => {
-      const messageElement = document.createElement("div");
-      messageElement.innerText = text;
-      messageElement.style.fontFamily = "ProggyClean";
-      messageElement.style.fontWeight = "bold";
+    room.state.messages.onAdd((message) => {
       const messages = document.getElementById("messages");
       if (!messages) return;
+
+      const text = message.text;
+      const messageElement = document.createElement("div");
+      const nameElement = document.createElement("div");
+      const textElement = document.createElement("div");
+      messageElement.appendChild(nameElement);
+      messageElement.appendChild(textElement);
+      messageElement.style.display = "flex";
+      messageElement.style.gap = "8px";
+      messageElement.style.fontFamily = "ProggyClean";
+      messageElement.style.fontWeight = "bold";
+      nameElement.style.color = message.color;
+
+      textElement.innerText = text;
+      nameElement.innerText = `${message.name}:`;
+
       messages.appendChild(messageElement);
       messages.scrollTop = messages.scrollHeight;
     });

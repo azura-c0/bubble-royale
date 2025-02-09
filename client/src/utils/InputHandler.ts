@@ -52,7 +52,7 @@ export class InputHandler {
   }
 
   public sync() {
-    NetworkManager.getInstance().room.send("input", this._input);
+    NetworkManager.instance.room.send("input", this._input);
   }
 
   public stopListening() {

@@ -81,7 +81,9 @@ export class UIScene extends Phaser.Scene {
           right.setFrame(0);
           game.events.emit("cameraRight");
         });
-    });
+
+      this.createMenuButton();
+   });
 
     const deathMessages = [
       "was eliminated",
@@ -95,9 +97,9 @@ export class UIScene extends Phaser.Scene {
       "was sent to the shadow realm",
       "went out for milk and cigarettes",
       "is in a worse place now",
-    ]
+    ];
 
-    game.events.on('deathMessage', (name: string) => {
+    game.events.on("deathMessage", (name: string) => {
       const message = Math.floor(Math.random() * deathMessages.length);
 
       if (this.eliminated) {
@@ -105,18 +107,23 @@ export class UIScene extends Phaser.Scene {
         this.eliminated = undefined;
       }
 
-      this.eliminated = this.add.text(SCREEN_WIDTH - 32, 64, name + " " + deathMessages[message], {
-        color: "#ffffff",
-        fontFamily: 'ProggyClean',
-        fontSize: 32,
-        shadow: {
-          blur: 2,
-          fill: true,
-          color: "black"
+      this.eliminated = this.add.text(
+        SCREEN_WIDTH - 32,
+        SCREEN_HEIGHT - 84,
+        name + " " + deathMessages[message],
+        {
+          color: "#ffffff",
+          fontFamily: "ProggyClean",
+          fontSize: 32,
+          shadow: {
+            blur: 2,
+            fill: true,
+            color: "black",
+          },
+          stroke: "black",
+          strokeThickness: 4,
         },
-        stroke: "black",
-        strokeThickness: 4
-      });
+      );
       this.eliminated.setOrigin(1, 0.5);
 
       setTimeout(() => {
@@ -125,10 +132,9 @@ export class UIScene extends Phaser.Scene {
           this.eliminated = undefined;
         }
       }, 5000);
+    });
 
-    })
-
-    NetworkManager.getInstance().room.onMessage("win", (name: string) => {
+    NetworkManager.instance.room.onMessage("win", (name: string) => {
       this.add
         .text(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, `${name} wins!`, {
           fontSize: "68px",
@@ -137,6 +143,11 @@ export class UIScene extends Phaser.Scene {
         })
         .setOrigin(0.5, 0.5);
 
+      this.createMenuButton();
+    });
+  }
+
+  createMenuButton() {
       const label = this.add
         .text(
           SCREEN_WIDTH / 2,
@@ -180,6 +191,5 @@ export class UIScene extends Phaser.Scene {
           button.setFillStyle(0x000000, 0.8);
           window.location.reload();
         });
-    });
   }
 }
